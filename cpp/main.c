@@ -9,7 +9,7 @@
 
 void test_findsp()
 {
-	char *filename = "e:/python-project/test/num/xy_522_2.txt";
+	char *filename = "d:/wzb/project/python-project/test/num/xy100.txt";
 	ReadCsvData(filename);
 	printf("giNumRow=%d,giNumCol=%d\n", giNumRow, giNumCol);
 	//ShowCsvData();
@@ -57,7 +57,7 @@ void test_findsp()
 void test_mat()
 {
 	int n, i, length;
-	char *filename = "e:/python-project/test/num/xy_522_2.txt";
+	char *filename = "d:/wzb/project/python-project/test/num/xy.txt";
 	ReadCsvData(filename);
 	printf("giNumRow=%d,giNumCol=%d\n", giNumRow, giNumCol);
 
@@ -65,14 +65,14 @@ void test_mat()
 
 	POINT *old_data;
 	POINT b[4];
-	int N = giNumRow*sizeof(POINT);
+	
+	int N = giNumRow*sizeof(struct point_s);
 	printf("N=%d\n", N);
 
 	old_data = (POINT*)malloc(N);
-	//old_data->x = (float*)malloc(giNumRow*sizeof(float));
 	memset(b, 0, sizeof(b));
-	memset(old_data, 0, sizeof(old_data));
-	printf("sizeof(old_data)=%d,sizeof(POINT)=%d\n", sizeof(old_data), sizeof(POINT));
+	memset(old_data, 0, sizeof(old_data)*giNumRow);
+	
 	for (i = 0; i < giNumRow; i++) {
 		printf("%f,%f\n", giCsvData[i*giNumCol + 0], giCsvData[i*giNumCol + 1]);
 		//memcpy(x + i*sizeof(giCsvData[i*giNumCol + 0]), &(giCsvData[i*giNumCol + 0]), sizeof(giCsvData[i*giNumCol + 0]));
@@ -82,20 +82,33 @@ void test_mat()
 	}
 
 	printf("####################\n");
-
 	for (int i = 0; i <giNumRow; i++) {
 
-		printf("%f,%f\n", old_data[i].x, old_data[i].y);
+		//printf("%f,%f\n", old_data[i].x, old_data[i].y);
 	}
 	
 	//length = sizeof(a) / sizeof(POINT);
 	//printf("length=%d\n", length);
-	rotatingcalipers(old_data, giNumRow, b);
+	//rotatingcalipers(old_data, giNumRow, b);
 
-	for (i = 0; i < 4; i++) {
-		printf("[%f, %f] ", b[i].x, b[i].y);
+	//for (i = 0; i < 4; i++) {
+		//printf("[%f, %f] ", b[i].x, b[i].y);
+	//}
+	//printf("\n");
+
+	POINT *new_data;
+	new_data= (POINT*)malloc(N);
+	memset(new_data, 0, sizeof(new_data)*giNumRow);
+	data_analysis(old_data,giNumRow,new_data);
+	FILE *file;
+	fopen_s(&file, "newxy.txt", "w+");
+	for (i = 0; i < giNumRow; i++) {
+		fprintf(file, "%f", new_data[i].x);
+		fprintf(file, "%s", ",");
+		fprintf(file, "%f", new_data[i].y);
+		fprintf(file, "%s", "\n");
 	}
-	printf("\n");
+	fclose(file);
 	FreeCsvData();
 }
 

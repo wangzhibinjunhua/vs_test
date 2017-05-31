@@ -222,6 +222,92 @@ rotatingcalipers(POINT *arr, int len, POINT *rectangle)
 	}
 }
 
+void 
+data_analysis(POINT *xy, int len, POINT *pxy)
+{
+	int i;
+	for (i = 0; i < len; i++) {
+		if (xy[i].x > 28)xy[i].x = 28;
+		if (xy[i].x < -28)xy[i].x = -28;
+		if (xy[i].y > 28)xy[i].y = 28;
+		if (xy[i].y < -28)xy[i].y = -28;
+	}
+
+	POINT b[4];
+	memset(b, 0, sizeof(b));
+
+	POINT *xy_temp;
+	xy_temp = (POINT*)malloc(len*sizeof(xy_temp));
+	memset(xy_temp, 0, len * sizeof(xy_temp));
+	memcpy(xy_temp,xy,sizeof(xy_temp)*len);
+	rotatingcalipers(xy_temp, len, b);
+	for (i = 0; i < 4; i++) {
+		printf("[%f, %f] ", b[i].x, b[i].y);
+	}
+	POINT max_y, min_x,min_y;
+	max_y.y = b[0].y;
+	max_y.x = b[0].x;
+	min_x.x = b[0].x;
+	min_x.y = b[0].y;
+	min_y.y = b[0].y;
+	min_y.x = b[0].x;
+	for (i = 0; i < 4; i++) {
+		if (max_y.y < b[i].y) {
+			max_y.y = b[i].y;
+			max_y.x = b[i].x;
+		}
+
+		if (min_x.x > b[i].x) {
+			min_x.x = b[i].x;
+			min_x.y = b[i].y;
+		}
+
+		if (min_y.y > b[i].y) {
+			min_y.y = b[i].y;
+			min_y.x = b[i].x;
+		}
+	}
+
+	float sin_yaw = (max_y.x - min_x.x) / getdist(min_x, max_y);
+	float cos_yaw = (max_y.y - min_x.y) / getdist(min_x, max_y);
+	printf("sin yaw=%f,cos yaw=%f\n", sin_yaw, cos_yaw);
+	for (i = 0; i < len; i++) {
+		pxy[i].x = xy[i].x*cos_yaw - xy[i].y*sin_yaw;
+		pxy[i].y = xy[i].y*cos_yaw + xy[i].x*sin_yaw;
+
+	}
+
+	POINT p_max_y, p_min_x, p_min_y;
+	p_max_y.x = max_y.x*cos_yaw - max_y.y*sin_yaw;
+	p_max_y.y= max_y.y*cos_yaw + max_y.x*sin_yaw;
+
+	p_min_x.x = min_x.x*cos_yaw - min_x.y*sin_yaw;
+	p_min_x.y = min_x.y*cos_yaw + min_x.x*sin_yaw;
+
+	p_min_y.x = min_y.x*cos_yaw - min_y.y*sin_yaw;
+	p_min_y.y = min_y.y*cos_yaw + min_y.x*sin_yaw;
+
+	if ((p_max_y.y - p_min_x.y) > (p_min_y.x - p_min_x.x)) {
+		for (i = 0; i < len; i++) {
+			float temp;
+			temp = pxy[i].x;
+			pxy[i].x = pxy[i].y;
+			pxy[i].y = temp;
+
+			if (p_min_x.x < 0)pxy[i].x -= p_min_x.x;
+			if (p_min_x.y < 0)pxy[i].y -= p_min_x.y;
+		}
+	}
+	else {
+		printf("1111\n");
+		for (i = 0; i < len; i++) {
+			if (p_min_x.x < 0)pxy[i].x -= p_min_x.x-0.000001f;
+			if (p_min_x.y < 0)pxy[i].y -= p_min_x.y-0.000001f;
+		}
+	}
+
+}
+
 /*int
 main(int argc, char *argv[])
 {
