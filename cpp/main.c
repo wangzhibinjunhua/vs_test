@@ -62,6 +62,7 @@ void test_mat()
 	printf("giNumRow=%d,giNumCol=%d\n", giNumRow, giNumCol);
 
 	POINT a[] = { { 1.0, 2.0 },{ 2.0, 0.5 },{ 2.5, 1.0 },{ 2.0, 0.0 },{ 4.0, 2.0 } };
+
 	POINT *old_data;
 	POINT b[4];
 	int N = giNumRow*sizeof(POINT);
@@ -89,7 +90,8 @@ void test_mat()
 	
 	//length = sizeof(a) / sizeof(POINT);
 	//printf("length=%d\n", length);
-	rotatingcalipers(a, giNumRow, b);
+	rotatingcalipers(old_data, giNumRow, b);
+
 	for (i = 0; i < 4; i++) {
 		printf("[%f, %f] ", b[i].x, b[i].y);
 	}
