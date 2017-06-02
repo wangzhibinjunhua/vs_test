@@ -57,7 +57,7 @@ void test_findsp()
 void test_mat()
 {
 	int n, i, length;
-	char *filename = "d:/wzb/project/python-project/test/num/xy.txt";
+	char *filename = "e:/python-project/test/num/xy200.txt";
 	ReadCsvData(filename);
 	printf("giNumRow=%d,giNumCol=%d\n", giNumRow, giNumCol);
 
@@ -66,12 +66,12 @@ void test_mat()
 	POINT *old_data;
 	POINT b[4];
 	
-	int N = giNumRow*sizeof(struct point_s);
+	int N = giNumRow*sizeof(POINT);
 	printf("N=%d\n", N);
 
 	old_data = (POINT*)malloc(N);
 	memset(b, 0, sizeof(b));
-	memset(old_data, 0, sizeof(old_data)*giNumRow);
+	memset(old_data, 0, sizeof(POINT)*giNumRow);
 	
 	for (i = 0; i < giNumRow; i++) {
 		printf("%f,%f\n", giCsvData[i*giNumCol + 0], giCsvData[i*giNumCol + 1]);
@@ -109,13 +109,20 @@ void test_mat()
 		fprintf(file, "%s", "\n");
 	}
 	fclose(file);
+	free(old_data);
+	free(new_data);
+	old_data = NULL;
+	new_data = NULL;
 	FreeCsvData();
 }
 
 int main(int argc, char **argv)
 {
 	//test_findsp();
-	test_mat();
+	//test_mat();
+	POINT *a;
+	printf("sizeof(a)=%d,sizeof(point)=%d\n", sizeof(a), sizeof(POINT));
+
 	getchar();
 	return 0;
 }

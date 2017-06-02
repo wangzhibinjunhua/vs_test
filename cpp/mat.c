@@ -237,10 +237,12 @@ data_analysis(POINT *xy, int len, POINT *pxy)
 	memset(b, 0, sizeof(b));
 
 	POINT *xy_temp;
-	xy_temp = (POINT*)malloc(len*sizeof(xy_temp));
-	memset(xy_temp, 0, len * sizeof(xy_temp));
-	memcpy(xy_temp,xy,sizeof(xy_temp)*len);
+	xy_temp = (POINT*)malloc(len*sizeof(POINT));
+	memset(xy_temp, 0, len * sizeof(POINT));
+	memcpy(xy_temp,xy,sizeof(POINT)*len);
 	rotatingcalipers(xy_temp, len, b);
+	free(xy_temp);
+	xy_temp = NULL;
 	for (i = 0; i < 4; i++) {
 		printf("[%f, %f] ", b[i].x, b[i].y);
 	}
@@ -294,8 +296,8 @@ data_analysis(POINT *xy, int len, POINT *pxy)
 			pxy[i].x = pxy[i].y;
 			pxy[i].y = temp;
 
-			if (p_min_x.x < 0)pxy[i].x -= p_min_x.x;
-			if (p_min_x.y < 0)pxy[i].y -= p_min_x.y;
+			if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.000001f;
+			if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.000001f;
 		}
 	}
 	else {
