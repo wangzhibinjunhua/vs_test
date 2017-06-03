@@ -222,16 +222,75 @@ rotatingcalipers(POINT *arr, int len, POINT *rectangle)
 	}
 }
 
+static void variance_analysis(POINT *xy,int len)
+{
+	int i;
+	float sumx=0.0f,sumy=0.0f,avex=0.0f,avey=0.0f,varx=0.0f,vary=0.0f,stdx=0.0f,stdy=0.0f;
+	for (i = 0; i < len; i++) {
+		sumx += xy[i].x;
+		sumy += xy[i].y;
+	}
+
+	//平均值
+	avex = sumx / len;
+	avey = sumy / len;
+
+	for (i = 0; i < len; i++) {
+		varx += (xy[i].x - avex)*(xy[i].x - avex);
+		vary += (xy[i].y - avey)*(xy[i].y - avey);
+	}
+	//方差
+	varx = varx / len;
+	vary = vary / len;
+
+	//标准差
+	stdx = sqrt(varx);
+	stdy = sqrt(vary);
+
+	printf("stdx=%f,stdy=%f,avex=%f,avey=%f\n", stdx, stdy, avex, avey);
+
+	if (xy[0].x>(avex + 2 * stdx)) xy[0].x = avex;
+	if (xy[0].x < (avex - 2 * stdx)) xy[0].x = avex;
+
+	if (xy[0].y > (avey + 2 * stdy)) xy[0].y = avey;
+	if (xy[0].y < (avey - 2 * stdy)) xy[0].y = avey;
+
+	for (i = 1; i < len; i++) {
+		
+		if (xy[i].x>(avex + 2 * stdx)) xy[i].x = xy[i-1].x;
+		if (xy[i].x < (avex - 2 * stdx)) xy[i].x = xy[i - 1].x;
+
+		if (xy[i].y > (avey + 2 * stdy)) xy[i].y = xy[i-1].y;
+		if (xy[i].y < (avey - 2 * stdy)) xy[i].y = xy[i - 1].y;
+	}
+
+
+
+}
+
+void save_file(char *filename,POINT *data,int len) {
+	FILE *file;
+	int i;
+	fopen_s(&file, filename, "w+");
+	for (i = 0; i < len; i++) {
+		fprintf(file, "%f", data[i].x);
+		fprintf(file, "%s", ",");
+		fprintf(file, "%f", data[i].y);
+		fprintf(file, "%s", "\n");
+	}
+	fclose(file);
+}
+
 void 
 data_analysis(POINT *xy, int len, POINT *pxy)
 {
 	int i;
+	
+	variance_analysis(xy, len);
 	for (i = 0; i < len; i++) {
-		if (xy[i].x > 28)xy[i].x = 28;
-		if (xy[i].x < -28)xy[i].x = -28;
-		if (xy[i].y > 28)xy[i].y = 28;
-		if (xy[i].y < -28)xy[i].y = -28;
+		printf("var ana: %f,%f\n", xy[i].x, xy[i].y);
 	}
+	save_file("newxy1.txt",xy,len);
 
 	POINT b[4];
 	memset(b, 0, sizeof(b));
