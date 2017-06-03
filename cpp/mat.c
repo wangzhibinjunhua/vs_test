@@ -291,13 +291,16 @@ data_analysis(POINT *xy, int len, POINT *pxy)
 
 	if ((p_max_y.y - p_min_x.y) > (p_min_y.x - p_min_x.x)) {
 		for (i = 0; i < len; i++) {
+
+
+			if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.000001f;
+			if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.000001f;
+
 			float temp;
 			temp = pxy[i].x;
 			pxy[i].x = pxy[i].y;
 			pxy[i].y = temp;
 
-			if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.000001f;
-			if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.000001f;
 		}
 	}
 	else {

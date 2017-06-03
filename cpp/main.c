@@ -57,7 +57,7 @@ void test_findsp()
 void test_mat()
 {
 	int n, i, length;
-	char *filename = "e:/python-project/test/num/xy200.txt";
+	char *filename = "e:/python-project/test/num/xy0602.txt";
 	ReadCsvData(filename);
 	printf("giNumRow=%d,giNumCol=%d\n", giNumRow, giNumCol);
 
@@ -119,9 +119,7 @@ void test_mat()
 int main(int argc, char **argv)
 {
 	//test_findsp();
-	//test_mat();
-	POINT *a;
-	printf("sizeof(a)=%d,sizeof(point)=%d\n", sizeof(a), sizeof(POINT));
+	test_mat();
 
 	getchar();
 	return 0;
