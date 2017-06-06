@@ -222,6 +222,114 @@ rotatingcalipers(POINT *arr, int len, POINT *rectangle)
 	}
 }
 
+static float rectangle_area(POINT p0, POINT p1, POINT p2)
+{
+	return sqrt((p1.x - p0.x)*(p1.x - p0.x) + (p1.y - p0.y)*(p1.y - p0.y))*sqrt((p2.x - p1.x)*(p2.x - p1.x) + (p2.y - p1.y)*(p2.y - p1.y));
+}
+
+
+void
+rotatingcalipers_new(POINT *arr, int len, POINT *rectangle)
+{
+	int top, down, right = 1, up = 0, left = 0, downlast, rightlast, uplast, leftlast;
+	float area = FLT_MAX, dist, X, Y, k;
+	POINT temp;
+
+	getconvex(arr, len, &top);
+	arr[++top] = arr[0];
+	printf("top=%d\n", top);
+	for (int i = 0; i < top; i++) {
+		printf("convex:%f,%f\n", arr[i].x, arr[i].y);
+	}
+	for (down = 0; down < top; down++) {
+		// find right
+		while (getdot(arr[down], arr[down + 1], arr[right]) <= getdot(arr[down], arr[down + 1], arr[right + 1])) {
+			right = (right + 1) % top;
+		}
+
+		// find up
+		if (down == 0) {
+			up = right;
+		}
+		while (getcross(arr[down], arr[down + 1], arr[up]) <= getcross(arr[down], arr[down + 1], arr[up + 1])) {
+			up = (up + 1) % top;
+		}
+
+		// find down
+		if (down == 0) {
+			left = up;
+		}
+		while (getdot(arr[down], arr[down + 1], arr[left]) >= getdot(arr[down], arr[down + 1], arr[left + 1])) {
+			left = (left + 1) % top;
+		}
+
+		POINT temp_rectangle[4];
+		// 计算外接矩形
+		if (arr[down + 1].y == arr[down].y) {
+			temp_rectangle[0].x = arr[left].x;
+			temp_rectangle[0].y = arr[down].y;
+
+			temp_rectangle[1].x = arr[right].x;
+			temp_rectangle[1].y = arr[down].y;
+
+			temp_rectangle[2].x = arr[right].x;
+			temp_rectangle[2].y = arr[up].y;
+
+			temp_rectangle[3].x = arr[left].x;
+			temp_rectangle[3].y = arr[up].y;
+
+		}
+		else if (arr[down + 1].x == arr[down].x) {
+			temp_rectangle[0].x = arr[down].x;
+			temp_rectangle[0].y = arr[left].y;
+
+			temp_rectangle[1].x = arr[down].x;
+			temp_rectangle[1].y = arr[right].y;
+
+			temp_rectangle[2].x = arr[up].x;
+			temp_rectangle[2].y = arr[right].y;
+
+			temp_rectangle[3].x = arr[up].x;
+			temp_rectangle[3].y = arr[left].y;
+
+		}
+		else {
+			k = (arr[down + 1].y - arr[down].y) / (arr[down + 1].x - arr[down].x);
+
+			temp_rectangle[0].x = (k*arr[left].y + arr[left].x - k*arr[down].y + k*k*arr[down].x) / (k*k + 1.0);
+			temp_rectangle[0].y = k*temp_rectangle[0].x + arr[down].y - k*arr[down].x;
+
+			temp_rectangle[1].x = (k*arr[right].y + arr[right].x - k*arr[down].y + k*k*arr[down].x) / (k*k + 1.0);
+			temp_rectangle[1].y = k*temp_rectangle[1].x + arr[down].y - k*arr[down].x;
+
+			temp_rectangle[2].x = (k*arr[right].y + arr[right].x - k*arr[up].y + k*k*arr[up].x) / (k*k + 1.0);
+			temp_rectangle[2].y = k*temp_rectangle[2].x + arr[up].y - k*arr[up].x;
+
+			temp_rectangle[3].x = (k*arr[left].y + arr[left].x - k*arr[up].y + k*k*arr[up].x) / (k*k + 1.0);
+			temp_rectangle[3].y = k*temp_rectangle[3].x + arr[up].y - k*arr[up].x;
+		}
+		float rectarea = rectangle_area(temp_rectangle[0], temp_rectangle[1], temp_rectangle[2]);
+		printf("rectarea=%f,down=%d,right=%d,up=%d,left=%d\n", rectarea, down, right, up, left);
+		if (area > rectarea) {
+			area = rectarea;
+			downlast = down;
+			rightlast = right;
+			uplast = up;
+			leftlast = left;
+			rectangle[0] = temp_rectangle[0];
+			rectangle[1] = temp_rectangle[1];
+			rectangle[2] = temp_rectangle[2];
+			rectangle[3] = temp_rectangle[3];
+			printf("last down=%d,right=%d,up=%d,left=%d\n", downlast, rightlast, uplast, leftlast);
+		}
+	}
+
+	
+	
+}
+
+
+
 static void variance_analysis(POINT *xy,int len)
 {
 	int i;
@@ -299,7 +407,7 @@ data_analysis(POINT *xy, int len, POINT *pxy)
 	xy_temp = (POINT*)malloc(len*sizeof(POINT));
 	memset(xy_temp, 0, len * sizeof(POINT));
 	memcpy(xy_temp,xy,sizeof(POINT)*len);
-	rotatingcalipers(xy_temp, len, b);
+	rotatingcalipers_new(xy_temp, len, b);
 	free(xy_temp);
 	xy_temp = NULL;
 	for (i = 0; i < 4; i++) {

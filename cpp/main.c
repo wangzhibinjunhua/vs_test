@@ -98,7 +98,7 @@ void test_mat()
 
 	POINT *new_data;
 	new_data= (POINT*)malloc(N);
-	memset(new_data, 0, sizeof(new_data)*giNumRow);
+	memset(new_data, 0, sizeof(POINT)*giNumRow);
 	data_analysis(old_data,giNumRow,new_data);
 	FILE *file;
 	fopen_s(&file, "newxy.txt", "w+");
