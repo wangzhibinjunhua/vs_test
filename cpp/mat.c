@@ -430,16 +430,24 @@ data_analysis(POINT *xy, int len, POINT *pxy)
 			min_x.x = b[i].x;
 			min_x.y = b[i].y;
 		}
-
-		if (min_y.y > b[i].y) {
+		if (min_y.y >= b[i].y) {
 			min_y.y = b[i].y;
 			min_y.x = b[i].x;
 		}
+
 	}
 
-	float sin_yaw = (max_y.x - min_x.x) / getdist(min_x, max_y);
-	float cos_yaw = (max_y.y - min_x.y) / getdist(min_x, max_y);
-	printf("sin yaw=%f,cos yaw=%f\n", sin_yaw, cos_yaw);
+	float sin_yaw, cos_yaw;
+	if (min_x.y == min_y.y) {
+		sin_yaw = 0;
+		cos_yaw = 1;
+	}
+	else {
+		sin_yaw = (max_y.x - min_x.x) / getdist(min_x, max_y);
+		cos_yaw = (max_y.y - min_x.y) / getdist(min_x, max_y);
+	}
+
+
 	for (i = 0; i < len; i++) {
 		pxy[i].x = xy[i].x*cos_yaw - xy[i].y*sin_yaw;
 		pxy[i].y = xy[i].y*cos_yaw + xy[i].x*sin_yaw;
