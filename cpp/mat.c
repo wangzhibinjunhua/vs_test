@@ -94,7 +94,7 @@ vectorsort(POINT *arr, int left, int right)
 * Description:  ¼ÆËãÍ¹°ü
 *
 */
-void
+static void
 getconvex(POINT *arr, int len, int *n)
 {
 	int i, base, top;
@@ -130,7 +130,7 @@ getconvex(POINT *arr, int len, int *n)
 	*n = top;
 }
 
-void
+static void
 rotatingcalipers(POINT *arr, int len, POINT *rectangle)
 {
 	int top, down, right = 1, up = 0, left = 0, downlast, rightlast, uplast, leftlast;
@@ -166,8 +166,8 @@ rotatingcalipers(POINT *arr, int len, POINT *rectangle)
 		X = getcross(arr[down], arr[down + 1], arr[up]) / dist;
 		temp.x = arr[right].x + arr[down].x - arr[left].x;
 		temp.y = arr[right].y + arr[down].y - arr[left].y;
-		Y = getdot(arr[down], arr[down + 1], temp);
-
+		Y = getdot(arr[down], arr[down + 1], temp)/ dist;
+		printf("X*Y=%f,down=%d,right=%d,up=%d,left=%d\n", X*Y, down, right, up, left);
 		if (area > X*Y) {
 			area = X*Y;
 			downlast = down;
@@ -229,7 +229,7 @@ static float rectangle_area(POINT p0, POINT p1, POINT p2)
 }
 
 
-void
+static void
 rotatingcalipers_new(POINT *arr, int len, POINT *rectangle)
 {
 	int top, down, right = 1, up = 0, left = 0, downlast, rightlast, uplast, leftlast;
@@ -408,7 +408,7 @@ data_analysis(POINT *xy, int len, POINT *pxy)
 	xy_temp = (POINT*)malloc(len*sizeof(POINT));
 	memset(xy_temp, 0, len * sizeof(POINT));
 	memcpy(xy_temp,xy,sizeof(POINT)*len);
-	rotatingcalipers_new(xy_temp, len, b);
+	rotatingcalipers(xy_temp, len, b);
 	free(xy_temp);
 	xy_temp = NULL;
 	for (i = 0; i < 4; i++) {

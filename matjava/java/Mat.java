@@ -103,12 +103,8 @@ public class Mat {
 		n.get(0).setN(top);
 
 	}
-	
-	public static float getRectangleArea(Point p0,Point p1,Point p2){
-		return getdist(p0,p1)*getdist(p1, p2);
-	}
 
-	public static void rotatingcalipers(ArrayList<Point> arr, int len, ArrayList<Point> rectanglelast) {
+	public static void rotatingcalipers(ArrayList<Point> arr, int len, ArrayList<Point> rectangle) {
 		int top, down=0, right = 1, up = 0, left = 0, downlast , rightlast, uplast, leftlast;
 
 		float area = Float.MAX_VALUE, dist, X, Y, k;
@@ -156,34 +152,25 @@ public class Mat {
 				left = (left + 1) % top;
 			}
 
-//			dist = getdist(arr.get(down), arr.get(down + 1));
-//			X = getcross(arr.get(down), arr.get(down + 1), arr.get(up)) / dist;
-//			temp.setX(arr.get(right).getX() + arr.get(down).getX() - arr.get(left).getX());
-//			temp.setY(arr.get(right).getY() + arr.get(down).getY() - arr.get(left).getY());
-//			Y = getdot(arr.get(down), arr.get(down + 1), temp);
-//
-//			if (area > X*Y) {
-//				area = X*Y;
-//				downlast = down;
-//				rightlast = right;
-//				uplast = up;
-//				leftlast = left;
-//			}
-			
-			downlast = down;
-			rightlast = right;
-			uplast = up;
-			leftlast = left;
-			ArrayList<Point> rectangle=new ArrayList<Point>();
-			int j;
-			for(j=0;j<4;j++){
-				Point point=new Point();
-				rectangle.add(point);
+			dist = getdist(arr.get(down), arr.get(down + 1));
+			X = getcross(arr.get(down), arr.get(down + 1), arr.get(up)) / dist;
+			temp.setX(arr.get(right).getX() + arr.get(down).getX() - arr.get(left).getX());
+			temp.setY(arr.get(right).getY() + arr.get(down).getY() - arr.get(left).getY());
+			Y = getdot(arr.get(down), arr.get(down + 1), temp)/dist;
+
+			if (area > X*Y) {
+				area = X*Y;
+				downlast = down;
+				rightlast = right;
+				uplast = up;
+				leftlast = left;
 			}
-			// 计算外接矩形
-			if (arr.get(downlast + 1).getY() == arr.get(downlast).getY()) {
-				rectangle.get(0).setX(arr.get(leftlast).getX());
-				rectangle.get(0).setY(arr.get(downlast).getY());
+		}
+
+		// 计算外接矩形
+		if (arr.get(downlast + 1).getY() == arr.get(downlast).getY()) {
+			rectangle.get(0).setX(arr.get(leftlast).getX());
+			rectangle.get(0).setY(arr.get(downlast).getY());
 
 			rectangle.get(1).setX(arr.get(rightlast).getX());
 			rectangle.get(1).setY(arr.get(downlast).getY());
@@ -221,27 +208,9 @@ public class Mat {
 			rectangle.get(2).setX((float)((k*arr.get(rightlast).getY() + arr.get(rightlast).getX() - k*arr.get(uplast).getY() + k*k*arr.get(uplast).getX()) / (k*k + 1.0)));
 			rectangle.get(2).setY((float)(k*rectangle.get(2).getX() + arr.get(uplast).getY() - k*arr.get(uplast).getX()));
 
-				rectangle.get(3).setX((float)((k*arr.get(leftlast).getY() + arr.get(leftlast).getX() - k*arr.get(uplast).getY() + k*k*arr.get(uplast).getX()) / (k*k + 1.0)));
-				rectangle.get(3).setY((float)(k*rectangle.get(3).getX() + arr.get(uplast).getY() - k*arr.get(uplast).getX()));
-			}
-			
-			if(area>getRectangleArea(rectangle.get(0), rectangle.get(1), rectangle.get(2))){
-				area=getRectangleArea(rectangle.get(0), rectangle.get(1), rectangle.get(2));
-				rectanglelast.get(0).setX(rectangle.get(0).getX());
-				rectanglelast.get(0).setY(rectangle.get(0).getY());
-
-				rectanglelast.get(1).setX(rectangle.get(1).getX());
-				rectanglelast.get(1).setY(rectangle.get(1).getY());
-
-				rectanglelast.get(2).setX(rectangle.get(2).getX());
-				rectanglelast.get(2).setY(rectangle.get(2).getY());
-
-				rectanglelast.get(3).setX(rectangle.get(3).getX());
-				rectanglelast.get(3).setY(rectangle.get(3).getY());
-			}
+			rectangle.get(3).setX((float)((k*arr.get(leftlast).getY() + arr.get(leftlast).getX() - k*arr.get(uplast).getY() + k*k*arr.get(uplast).getX()) / (k*k + 1.0)));
+			rectangle.get(3).setY((float)(k*rectangle.get(3).getX() + arr.get(uplast).getY() - k*arr.get(uplast).getX()));
 		}
-
-		
 	}
 
 	public static void variance_analysis(ArrayList<Point> xy,int len)
