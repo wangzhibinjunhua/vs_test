@@ -138,6 +138,104 @@ rotatingcalipers(POINT *arr, int len, POINT *rectangle)
 	POINT temp;
 
 	getconvex(arr, len, &top);
+	//fix bug
+	POINT *new_arr;
+	new_arr = (POINT*)malloc((len+1)*sizeof(POINT));
+	if (new_arr != NULL) {
+		memcpy(new_arr, arr, len * sizeof(POINT));
+		new_arr[++top] = new_arr[0];
+		printf("top=%d\n", top);
+		for (int i = 0; i < top; i++) {
+			printf("convex:%f,%f\n", new_arr[i].x, new_arr[i].y);
+		}
+		for (down = 0; down < top; down++) {
+			// find right
+			while (getdot(new_arr[down], new_arr[down + 1], new_arr[right]) <= getdot(new_arr[down], new_arr[down + 1], new_arr[right + 1])) {
+				right = (right + 1) % top;
+			}
+
+			// find up
+			if (down == 0) {
+				up = right;
+			}
+			while (getcross(new_arr[down], new_arr[down + 1], new_arr[up]) <= getcross(new_arr[down], new_arr[down + 1], new_arr[up + 1])) {
+				up = (up + 1) % top;
+			}
+
+			// find down
+			if (down == 0) {
+				left = up;
+			}
+			while (getdot(new_arr[down], new_arr[down + 1], new_arr[left]) >= getdot(new_arr[down], new_arr[down + 1], new_arr[left + 1])) {
+				left = (left + 1) % top;
+			}
+
+			dist = getdist(new_arr[down], new_arr[down + 1]);
+			X = getcross(new_arr[down], new_arr[down + 1], new_arr[up]) / dist;
+			temp.x = new_arr[right].x + new_arr[down].x - new_arr[left].x;
+			temp.y = new_arr[right].y + new_arr[down].y - new_arr[left].y;
+			Y = getdot(new_arr[down], new_arr[down + 1], temp);
+			printf("x*y=%f,down=%d,right=%d,up=%d,left=%d\n", X*Y, down, right, up, left);
+			if (area > X*Y) {
+				area = X*Y;
+				downlast = down;
+				rightlast = right;
+				uplast = up;
+				leftlast = left;
+			}
+		}
+
+
+		printf("last down=%d,right=%d,up=%d,left=%d\n", downlast, rightlast, uplast, leftlast);
+		// 计算外接矩形
+		if (new_arr[downlast + 1].y == new_arr[downlast].y) {
+			rectangle[0].x = new_arr[leftlast].x;
+			rectangle[0].y = new_arr[downlast].y;
+
+			rectangle[1].x = new_arr[rightlast].x;
+			rectangle[1].y = new_arr[downlast].y;
+
+			rectangle[2].x = new_arr[rightlast].x;
+			rectangle[2].y = new_arr[uplast].y;
+
+			rectangle[3].x = new_arr[leftlast].x;
+			rectangle[3].y = new_arr[uplast].y;
+
+		}
+		else if (new_arr[downlast + 1].x == new_arr[downlast].x) {
+			rectangle[0].x = new_arr[downlast].x;
+			rectangle[0].y = new_arr[leftlast].y;
+
+			rectangle[1].x = new_arr[downlast].x;
+			rectangle[1].y = new_arr[rightlast].y;
+
+			rectangle[2].x = new_arr[uplast].x;
+			rectangle[2].y = new_arr[rightlast].y;
+
+			rectangle[3].x = new_arr[uplast].x;
+			rectangle[3].y = new_arr[leftlast].y;
+
+		}
+		else {
+			k = (new_arr[downlast + 1].y - new_arr[downlast].y) / (new_arr[downlast + 1].x - new_arr[downlast].x);
+
+			rectangle[0].x = (k*new_arr[leftlast].y + new_arr[leftlast].x - k*new_arr[downlast].y + k*k*new_arr[downlast].x) / (k*k + 1.0);
+			rectangle[0].y = k*rectangle[0].x + new_arr[downlast].y - k*new_arr[downlast].x;
+
+			rectangle[1].x = (k*new_arr[rightlast].y + new_arr[rightlast].x - k*new_arr[downlast].y + k*k*new_arr[downlast].x) / (k*k + 1.0);
+			rectangle[1].y = k*rectangle[1].x + new_arr[downlast].y - k*new_arr[downlast].x;
+
+			rectangle[2].x = (k*new_arr[rightlast].y + new_arr[rightlast].x - k*new_arr[uplast].y + k*k*new_arr[uplast].x) / (k*k + 1.0);
+			rectangle[2].y = k*rectangle[2].x + new_arr[uplast].y - k*new_arr[uplast].x;
+
+			rectangle[3].x = (k*new_arr[leftlast].y + new_arr[leftlast].x - k*new_arr[uplast].y + k*k*new_arr[uplast].x) / (k*k + 1.0);
+			rectangle[3].y = k*rectangle[3].x + new_arr[uplast].y - k*new_arr[uplast].x;
+		}
+		free(new_arr);
+		new_arr = NULL;
+		return;
+	}
+	//end
 	arr[++top] = arr[0];
 
 	for (down = 0; down<top; down++) {
