@@ -114,9 +114,14 @@ public class Mat {
 		ilist.add(c);
 		getconvex(arr, len, ilist);
 		top=ilist.get(0).getN();
-		System.out.println("top="+top);
+
 		++top;
 		int ret=top;
+		System.out.println("top="+top);
+		if(ret==len){
+			Point point=new Point();
+			arr.add(point);
+		}
 		arr.get(ret).setX(arr.get(0).getX());
 		arr.get(ret).setY(arr.get(0).getY());
 		
