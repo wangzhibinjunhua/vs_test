@@ -145,10 +145,10 @@ static int detect_peak(float new_value, float old_value)
 			step_env.continue_up_count.acc_z = 0;
 			step_env.direction_is_up.acc_z = 0;
 		}
-		//printf("wzb detect peak z old v=%d,new v=%d\r\n", (int)old_value, (int)new_value);
+		//printf("wzb detect peak z old v=%f,new v=%f\n", old_value, new_value);
 		if ((step_env.direction_is_up.acc_z == 0) && (step_env.last_status_is_up.acc_z == 1) && (step_env.continue_up_former_count.acc_z >= 1/*2*/ && (old_value >= step_env.min_acc_value))) {
 			step_env.peak_wave.acc_z = old_value;
-			//printf("wzb detect peak z 11\r\n");
+			//printf("wzb detect peak z 11\n");
 			return 1;
 		}
 		else if ((step_env.last_status_is_up.acc_z == 0) && (step_env.direction_is_up.acc_z == 1)) {
@@ -414,7 +414,7 @@ void detect_new_step_v5(float acc_x, float acc_y, float acc_z, int line,float ya
 						}
 						else if (step_env.temp_step.type == JUMP) {
 							if (step_env.y_step.sec_peak_time - step_env.temp_step.time < 190) {
-								if (step_env.temp_step.value <= step_env.y_step.value) {
+								if ((step_env.temp_step.value <= step_env.y_step.value)&& (step_env.y_step.ori==FORWARD)) {
 									copy_y_step_to_temp();
 									reset_y_step_env();
 								}
@@ -445,6 +445,7 @@ void detect_new_step_v5(float acc_x, float acc_y, float acc_z, int line,float ya
 		step_env.detect_peak_mode = ACC_PEAK_Z;
 		step_env.min_acc_value = acc_z_abs_min_jump;
 		if (detect_peak(acc_z, step_env.acc_value_mode.acc_z_old)) {
+			printf("zzzz line=%d\n", line);
 			//step_env.time_of_now = inv_get_tick_count(line);		
 			if (step_env.time_of_now - MAX(step_env.last_step.time, get_temp_step_time(JUMP)) > 110) {
 				if (step_env.jump.flag == 0) {
@@ -455,7 +456,8 @@ void detect_new_step_v5(float acc_x, float acc_y, float acc_z, int line,float ya
 					step_env.jump_air_count = 0;
 				}
 				else if (step_env.jump.flag == 1) {
-					if (((step_env.time_of_now - step_env.jump.fir_peak_time) > 180) && ((step_env.time_of_now - step_env.jump.fir_peak_time) < 450)) {
+					printf(" zflag==1,line=%d,step_env.time_of_now - step_env.jump.fir_peak_time=%d\n", line, step_env.time_of_now - step_env.jump.fir_peak_time);
+					if (((step_env.time_of_now - step_env.jump.fir_peak_time) > 145) && ((step_env.time_of_now - step_env.jump.fir_peak_time) < 450)) {
 						printf("jump air count=%d\n", step_env.jump_air_count);
 						if (step_env.jump_air_count >= 0) {
 							step_env.jump.flag = 2;
@@ -464,17 +466,19 @@ void detect_new_step_v5(float acc_x, float acc_y, float acc_z, int line,float ya
 							printf("z jump.flag=2;line=%d\n", line);
 						}
 						else {
+
 							step_env.jump.flag = 1;
 							printf("z jump.flag=1; line=%d\n", line);
 							step_env.jump.fir_peak_time = step_env.time_of_now;
 							step_env.jump.fir_peak_value = step_env.acc_value_mode.acc_z_old;
 							step_env.jump_air_count = 0;
+
 						}					
 						
 					}
 					else if ((step_env.time_of_now - step_env.jump.fir_peak_time) >= 450) {
 						step_env.jump.flag = 1;
-						printf("z jump.flag=1; line=%d\n", line);
+						printf("z xx jump.flag=1; line=%d\n", line);
 						step_env.jump.fir_peak_time = step_env.time_of_now;
 						step_env.jump.fir_peak_value = step_env.acc_value_mode.acc_z_old;
 						step_env.jump_air_count = 0;
@@ -483,7 +487,7 @@ void detect_new_step_v5(float acc_x, float acc_y, float acc_z, int line,float ya
 
 
 				if (step_env.jump.flag == 2) {
-					step_env.jump.value = (step_env.jump.fir_peak_value + step_env.jump.sec_peak_value) / 2 - 25;
+					step_env.jump.value = ((step_env.jump.fir_peak_value + step_env.jump.sec_peak_value) / 2 - 25)*0.3333;
 					step_env.jump.time = step_env.jump.sec_peak_time = step_env.time_of_now;
 					step_env.jump.air_time = (step_env.jump.sec_peak_time - step_env.jump.fir_peak_time - 20)*TICK_TO_MS;
 					step_env.jump.jump_ori=gyr_y;
@@ -499,8 +503,9 @@ void detect_new_step_v5(float acc_x, float acc_y, float acc_z, int line,float ya
 						}
 						else if (step_env.temp_step.type == HORIZONTAL || step_env.temp_step.type == VERTICAL) {
 							if (step_env.jump.sec_peak_time - step_env.temp_step.time < 190) {
-
-								if (step_env.jump.value > step_env.temp_step.value) {
+								printf("jump value=%f,temp_step value=%f\n", step_env.jump.value, step_env.temp_step.value);
+								//if (step_env.jump.value > step_env.temp_step.value) {
+								if ((step_env.jump.value > step_env.temp_step.value)||(step_env.temp_step.ori==BACKWARD)) {
 									copy_jump_to_temp_step();
 									reset_jump_state();
 								}

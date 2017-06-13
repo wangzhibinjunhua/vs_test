@@ -116,11 +116,29 @@ void test_mat()
 	FreeCsvData();
 }
 
+void test1()
+{
+	int n, i, length;
+	POINT a[] = { { 0.0, 0.0 },{ 5.0, 0.0 },{ 5.0, 5.0 },{ 0.0, 5.0 } };
+	printf("a5 %f,%f\n", a[5].x, a[5].y);
+	a[5].x = 2;
+
+	a[5].y = 5;
+	printf("a5 %f,%f\n", a[5].x, a[5].y);
+	POINT b[4];
+	length = sizeof(a) / sizeof(POINT);
+	data_analysis(a, length, b);
+	for (i = 0; i < 4; i++) {
+		printf("[%f, %f] ", b[i].x, b[i].y);
+	}
+	printf("\n");
+}
+
 int main(int argc, char **argv)
 {
 	//test_findsp();
-	test_mat();
-
+	//test_mat();
+	test1();
 	getchar();
 	return 0;
 }
