@@ -134,11 +134,30 @@ void test1()
 	printf("\n");
 }
 
+void test2(char *b) {
+	char c[15] = { 'a','b','c','a','b','c','b','c','a','b','c','a','b','c' ,'e' };
+	memcpy(b + 2, c, 15);
+	char d[6] = { 0x80,0x00,0x00,0xec,0x82,0x81 };
+	memcpy(b + 17, d, 6);
+}
+
 int main(int argc, char **argv)
 {
 	//test_findsp();
 	//test_mat();
-	test1();
+	//test1();
+	char a[23] = { 0x22,0xff,0x00,0x00,0x00,0x00,0x00,0x00 ,0x00,0x00,0x00 ,0x00,0x00,0x00,0x0,0x0,0x0,0x1,0x2,0x3,0x4,0x5,0x6 };
+	int i;
+	for (i = 0; i < sizeof(a); i++) {
+		printf("%x", a[i]);
+		printf(" ");
+	}
+	test2(a);
+	printf("###########\n");
+	for (i = 0; i < sizeof(a); i++) {
+		printf("%x", a[i]);
+		printf(" ");
+	}
 	getchar();
 	return 0;
 }

@@ -45,7 +45,7 @@ static void data_v2(FILE *file)
 
 	int i = 0;
 	for (i = 0; i < giNumRow; i++) {
-	//for (i = 2800; i < 3200; i++) {
+	//for (i = 1280; i < 2160; i++) {
 		//detect_new_step_v2(samples_filter(giCsvData[i*giNumCol+1],0), samples_filter(giCsvData[i*giNumCol+2],1), (giCsvData[i*giNumCol+3]),i);
 		detect_new_step_v5(samples_filter(giCsvData[i*giNumCol+1],0), samples_filter(giCsvData[i*giNumCol+2],1), data_abs(giCsvData[i*giNumCol+3]),i, giCsvData[i*giNumCol + 4],-5.6f,file);
 		//detect_new_step_v2((giCsvData[i*giNumCol + 1]), (giCsvData[i*giNumCol + 2]),(giCsvData[i*giNumCol + 3]), i);
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 
 	init_step_env();
 
-	char *filename = "e:/python-project/test/num/ag_0307_02.txt";
+	char *filename = "e:/python-project/test/num/ao_wf_0613.txt";
 	ReadCsvData(filename);           
 	//ShowCsvData();     
 	fopen_s(&file, "xy.txt", "w+");
