@@ -23,6 +23,7 @@ static void enable_temp_jump();
 static void clear_temp_jump();
 static void copy_jump_to_temp();
 static void copy_jump_to_temp_step();
+static float update_maxv(float f);
 //static step_env_t step_env;
 
 float jump_time_height[100][3] = { 0 };
@@ -40,7 +41,7 @@ float acc_x_abs_min_run = 12.0f;//15.0f;
 float acc_y_abs_min_run = 12.0f;//15.0f;
 float acc_x_abs_min_dash = 20.0f;//28.0f;
 float acc_y_abs_min_dash = 20.0f;//28.0f;
-float acc_z_abs_min_jump = 25.0f;//40.0f;//15.0f;//40.0f;
+float acc_z_abs_min_jump = 40.0f;//25.0f;//40.0f;//15.0f;//40.0f;
 int acc_y_min_interval_step = 500;//ms
 
 int acc_y_min_interval_normal = 1260;//ms
@@ -133,7 +134,7 @@ static int detect_peak(float new_value, float old_value)
 	else if (step_env.detect_peak_mode == ACC_PEAK_Z) {
 		step_env.last_status_is_up.acc_z = step_env.direction_is_up.acc_z;
 
-		if (new_value < 5  && new_value>-4) {
+		if (new_value < 5  && new_value>-5) {
 			step_env.jump_air_count++;
 		}
 		if (new_value > old_value) {
@@ -278,7 +279,7 @@ void detect_new_step_v5(float acc_x, float acc_y, float acc_z, int line,float ya
 							}
 						}
 						else if (step_env.temp_step.type == JUMP) {
-							if (step_env.x_step.sec_peak_time - step_env.temp_step.time < 190) {
+							if (step_env.x_step.sec_peak_time - step_env.temp_step.time < 400) {
 								if (step_env.temp_step.value < step_env.x_step.value) {
 									copy_x_step_to_temp();
 									reset_x_step_env();
@@ -421,7 +422,7 @@ void detect_new_step_v5(float acc_x, float acc_y, float acc_z, int line,float ya
 							}
 						}
 						else if (step_env.temp_step.type == JUMP) {
-							if (step_env.y_step.sec_peak_time - step_env.temp_step.time < 190) {
+							if (step_env.y_step.sec_peak_time - step_env.temp_step.time < 400) {
 								if ((step_env.temp_step.value <= step_env.y_step.value)) {
 									copy_y_step_to_temp();
 									reset_y_step_env();
@@ -456,7 +457,7 @@ void detect_new_step_v5(float acc_x, float acc_y, float acc_z, int line,float ya
 			printf("zzzz line=%d\n", line);
 			//step_env.time_of_now = inv_get_tick_count(line);		
 			if (step_env.time_of_now - MAX(step_env.last_step.time, get_temp_step_time(JUMP)) > 110) {
-				if (step_env.jump.flag == 0) {
+				if (step_env.jump.flag == 0 ) {
 					step_env.jump.flag = 1;
 					step_env.jump.fir_peak_time = step_env.time_of_now;
 					step_env.jump.fir_peak_value = step_env.acc_value_mode.acc_z_old;
@@ -465,7 +466,7 @@ void detect_new_step_v5(float acc_x, float acc_y, float acc_z, int line,float ya
 				}
 				else if (step_env.jump.flag == 1) {
 					printf(" zflag==1,line=%d,step_env.time_of_now - step_env.jump.fir_peak_time=%d\n", line, step_env.time_of_now - step_env.jump.fir_peak_time);
-					if (((step_env.time_of_now - step_env.jump.fir_peak_time) > 145) && ((step_env.time_of_now - step_env.jump.fir_peak_time) < 320)) {
+					if (((step_env.time_of_now - step_env.jump.fir_peak_time) > 145) && ((step_env.time_of_now - step_env.jump.fir_peak_time) < 450)) {
 						printf("jump air count=%d\n", step_env.jump_air_count);
 						if (step_env.jump_air_count >= 0) {
 							step_env.jump.flag = 2;
@@ -484,7 +485,7 @@ void detect_new_step_v5(float acc_x, float acc_y, float acc_z, int line,float ya
 						}					
 						
 					}
-					else if ((step_env.time_of_now - step_env.jump.fir_peak_time) >= 320) {
+					else if ((step_env.time_of_now - step_env.jump.fir_peak_time) >= 450) {
 						step_env.jump.flag = 1;
 						printf("z xx jump.flag=1; line=%d\n", line);
 						step_env.jump.fir_peak_time = step_env.time_of_now;
@@ -498,6 +499,9 @@ void detect_new_step_v5(float acc_x, float acc_y, float acc_z, int line,float ya
 					step_env.jump.value = ((step_env.jump.fir_peak_value + step_env.jump.sec_peak_value) / 2 - 25)*0.333;
 					step_env.jump.time = step_env.jump.sec_peak_time = step_env.time_of_now;
 					step_env.jump.air_time = (step_env.jump.sec_peak_time - step_env.jump.fir_peak_time - 20)*TICK_TO_MS;
+					if (step_env.jump.air_time > 570) {
+						step_env.jump.air_time = step_env.jump.air_time*0.6;
+					}
 					step_env.jump.jump_ori=gyr_y;
 					if (step_env.temp_step.flag == 0) {
 						copy_jump_to_temp_step();
@@ -510,6 +514,7 @@ void detect_new_step_v5(float acc_x, float acc_y, float acc_z, int line,float ya
 							reset_jump_state();
 						}
 						else if (step_env.temp_step.type == HORIZONTAL || step_env.temp_step.type == VERTICAL) {
+#if 0
 							if (step_env.jump.sec_peak_time - step_env.temp_step.time < 190) {
 								printf("jump value=%f,temp_step value=%f\n", step_env.jump.value, step_env.temp_step.value);
 								//if (step_env.jump.value > step_env.temp_step.value) {
@@ -529,6 +534,36 @@ void detect_new_step_v5(float acc_x, float acc_y, float acc_z, int line,float ya
 								copy_jump_to_temp_step();
 								reset_jump_state();
 							}
+#else
+							if (step_env.jump.sec_peak_time - step_env.temp_step.time < 190) {
+								if ((step_env.jump.value > step_env.temp_step.value) || (step_env.temp_step.ori == BACKWARD)) {
+									if (step_env.temp_step.ori == BACKWARD) {
+										step_env.jump.value = MAX(step_env.jump.value, step_env.temp_step.value);
+									}
+									copy_jump_to_temp_step();
+	
+									reset_jump_state();
+								}
+								else {
+									reset_jump_state();
+								}
+							}
+							else{
+								if ((step_env.jump.fir_peak_time < step_env.temp_step.fir_peak_time) && (step_env.jump.sec_peak_time+15 > step_env.temp_step.sec_peak_time)) {
+								
+									enable_temp_step();
+									copy_jump_to_temp_step();
+									reset_jump_state();
+								}
+								else {
+									enable_temp_step();
+									//copy_jump_to_temp_step();
+									clear_temp_step();
+									reset_jump_state();
+								}
+							}
+					
+#endif
 						}
 					}
 
@@ -576,12 +611,9 @@ void detect_new_step_v5(float acc_x, float acc_y, float acc_z, int line,float ya
 			step_env.distance += step_env.stride * 2;
 
 			//max v
-			//if (step_env.mode == DASH) {
-			if(1){
-				if (step_env.max_v < (step_env.stride * 2 / step_env.frequency)*1000) {
-					step_env.max_v = (step_env.stride * 2 / step_env.frequency)*1000;
-				}
-			}
+			float temp_v = (step_env.stride * 2 / step_env.frequency) * 1000;
+			step_env.max_v=update_maxv(temp_v);		
+			//if (step_env.max_v < temp_v) step_env.max_v = temp_v;
 			//
 			if (step_env.ori == BACKWARD) {
 				step_env.backward_num += 2;
@@ -713,6 +745,28 @@ void print_result()
 	uint8_t rble_sample_result_data[32] = { 0 };
 	memset(rble_sample_result_data, 0, 32);
 	memcpy(rble_sample_result_data , &step_env.step_change_time, 4);
+}
+
+static float update_maxv(float f) 
+{
+	if ((step_env.max_v1 + step_env.max_v2 + step_env.max_v3) == 0) {
+		step_env.max_v1 = f;
+		step_env.max_v2 = step_env.max_v1 + 0.1;
+		step_env.max_v3 = step_env.max_v2 + 0.1;
+	}
+	else {
+		if (step_env.max_v1 <= step_env.max_v2 && step_env.max_v1 <= step_env.max_v3) {
+			step_env.max_v1 = f;
+		}
+		else if (step_env.max_v2 <= step_env.max_v1 && step_env.max_v2 <= step_env.max_v3) {
+			step_env.max_v2 = f;
+		}
+		else if (step_env.max_v3 <= step_env.max_v2 && step_env.max_v3 <= step_env.max_v1) {
+			step_env.max_v3 = f;
+		}
+	}
+
+	return (step_env.max_v1 + step_env.max_v2 + step_env.max_v3) / 3;
 }
 
 

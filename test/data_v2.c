@@ -34,6 +34,8 @@ float acc_z_abs_min_jump = 40.0f;//15.0f;//40.0f;
 #endif
 
 
+
+
 static int detect_peak(float new_value, float old_value)
 {
 	if (step_env.detect_peak_mode == ACC_PEAK_X2) {

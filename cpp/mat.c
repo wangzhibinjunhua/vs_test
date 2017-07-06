@@ -14,44 +14,28 @@ swap(POINT *arr, int a, int b)
 	arr[b] = temp;
 }
 
-/*
-*        Name:  getdist
-* Description:  计算两点间的距离
-*
-*/
+
 static float
 getdist(POINT p1, POINT p2)
 {
 	return sqrt((p2.x - p1.x)*(p2.x - p1.x) + (p2.y - p1.y)*(p2.y - p1.y));
 }
 
-/*
-*        Name:  getcross
-* Description:  计算叉积z方向的值，用于判断两个向量的转向
-*
-*/
+
 static float
 getcross(POINT p0, POINT p1, POINT p2)
 {
 	return (p1.x - p0.x)*(p2.y - p0.y) - (p2.x - p0.x)*(p1.y - p0.y);
 }
 
-/*
-*        Name:  getpod
-* Description:  计算两个向量的点积
-*
-*/
+
 static float
 getdot(POINT p0, POINT p1, POINT p2)
 {
 	return (p1.x - p0.x)*(p2.x - p0.x) + (p1.y - p0.y)*(p2.y - p0.y);
 }
 
-/*
-*        Name:  anglecmp
-* Description:  比较两个向量的逆时针转角方向，p1大于p2时返回大于0，等于时返回等于0
-*
-*/
+
 static float
 anglecmp(POINT p0, POINT p1, POINT p2)
 {
@@ -62,11 +46,7 @@ anglecmp(POINT p0, POINT p1, POINT p2)
 	return cross;
 }
 
-/*
-*        Name:  vectorsort
-* Description:  根据基点进行向量排序, 快速排序递归实现
-*
-*/
+
 static void
 vectorsort(POINT *arr, int left, int right)
 {
@@ -89,22 +69,18 @@ vectorsort(POINT *arr, int left, int right)
 	vectorsort(arr, last + 1, right);
 }
 
-/*
-*        Name:  getconvex
-* Description:  计算凸包
-*
-*/
+
 static void
 getconvex(POINT *arr, int len, int *n)
 {
 	int i, base, top;
 
-	/* 小于4个点的不计算凸包 */
+	
 	if (len < 4) {
 		*n = len;
 		return;
 	}
-	/* 计算基点，交换到0位置 */
+	
 	base = 0;
 	for (i = 0; i<len; i++) {
 		if (arr[i].y == arr[base].y && arr[i].x < arr[base].x) {
@@ -116,10 +92,10 @@ getconvex(POINT *arr, int len, int *n)
 	}
 	swap(arr, base, 0);
 
-	/* 排序 */
+	
 	vectorsort(arr, 1, len - 1);
 
-	/* 计算凸包 */
+	
 	top = 1;
 	for (i = 2; i<len; i++) {
 		while (top>0 && getcross(arr[top - 1], arr[top], arr[i]) <= 0) {
@@ -174,7 +150,7 @@ rotatingcalipers(POINT *arr, int len, POINT *rectangle)
 			X = getcross(new_arr[down], new_arr[down + 1], new_arr[up]) / dist;
 			temp.x = new_arr[right].x + new_arr[down].x - new_arr[left].x;
 			temp.y = new_arr[right].y + new_arr[down].y - new_arr[left].y;
-			Y = getdot(new_arr[down], new_arr[down + 1], temp);
+			Y = getdot(new_arr[down], new_arr[down + 1], temp)/dist;
 			printf("x*y=%f,down=%d,right=%d,up=%d,left=%d\n", X*Y, down, right, up, left);
 			if (area > X*Y) {
 				area = X*Y;
@@ -510,7 +486,7 @@ data_analysis(POINT *xy, int len, POINT *pxy)
 	free(xy_temp);
 	xy_temp = NULL;
 	for (i = 0; i < 4; i++) {
-		printf("[%f, %f] ", b[i].x, b[i].y);
+		printf("b:[%f, %f] ", b[i].x, b[i].y);
 	}
 	POINT max_y, min_x,min_y;
 	max_y.y = b[0].y;
@@ -560,6 +536,7 @@ data_analysis(POINT *xy, int len, POINT *pxy)
 	p_min_x.x = min_x.x*cos_yaw - min_x.y*sin_yaw;
 	p_min_x.y = min_x.y*cos_yaw + min_x.x*sin_yaw;
 
+
 	p_min_y.x = min_y.x*cos_yaw - min_y.y*sin_yaw;
 	p_min_y.y = min_y.y*cos_yaw + min_y.x*sin_yaw;
 
@@ -567,8 +544,8 @@ data_analysis(POINT *xy, int len, POINT *pxy)
 		for (i = 0; i < len; i++) {
 
 
-			if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.000001f;
-			if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.000001f;
+			if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.1f;
+			if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.1f;
 
 			float temp;
 			temp = pxy[i].x;
@@ -580,8 +557,8 @@ data_analysis(POINT *xy, int len, POINT *pxy)
 	else {
 		printf("1111\n");
 		for (i = 0; i < len; i++) {
-			if (p_min_x.x < 0)pxy[i].x -= p_min_x.x-0.000001f;
-			if (p_min_x.y < 0)pxy[i].y -= p_min_x.y-0.000001f;
+			if (p_min_x.x < 0)pxy[i].x -= p_min_x.x-0.1f;
+			if (p_min_x.y < 0)pxy[i].y -= p_min_x.y-0.1f;
 		}
 	}
 

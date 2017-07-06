@@ -57,7 +57,7 @@ void test_findsp()
 void test_mat()
 {
 	int n, i, length;
-	char *filename = "e:/python-project/test/num/xy060701.txt";
+	char *filename = "e:/python-project/test/num/xy_xcl3.txt";
 	ReadCsvData(filename);
 	printf("giNumRow=%d,giNumCol=%d\n", giNumRow, giNumCol);
 
@@ -101,7 +101,7 @@ void test_mat()
 	memset(new_data, 0, sizeof(POINT)*giNumRow);
 	data_analysis(old_data,giNumRow,new_data);
 	FILE *file;
-	fopen_s(&file, "newxy.txt", "w+");
+	fopen_s(&file, "newxy6.txt", "w+");
 	for (i = 0; i < giNumRow; i++) {
 		fprintf(file, "%f", new_data[i].x);
 		fprintf(file, "%s", ",");
@@ -118,18 +118,12 @@ void test_mat()
 
 void test1()
 {
-	int n, i, length;
-	POINT a[] = { { 0.0, 0.0 },{ 5.0, 0.0 },{ 5.0, 5.0 },{ 0.0, 5.0 } };
-	printf("a5 %f,%f\n", a[5].x, a[5].y);
-	a[5].x = 2;
-
-	a[5].y = 5;
-	printf("a5 %f,%f\n", a[5].x, a[5].y);
-	POINT b[4];
-	length = sizeof(a) / sizeof(POINT);
-	data_analysis(a, length, b);
-	for (i = 0; i < 4; i++) {
-		printf("[%f, %f] ", b[i].x, b[i].y);
+	int a = 5;
+	if (a < 7) {
+		printf("te111\n");
+	}
+	else if (a < 10) {
+		printf("te222\n");
 	}
 	printf("\n");
 }
@@ -145,19 +139,8 @@ int main(int argc, char **argv)
 {
 	//test_findsp();
 	//test_mat();
-	//test1();
-	char a[23] = { 0x22,0xff,0x00,0x00,0x00,0x00,0x00,0x00 ,0x00,0x00,0x00 ,0x00,0x00,0x00,0x0,0x0,0x0,0x1,0x2,0x3,0x4,0x5,0x6 };
-	int i;
-	for (i = 0; i < sizeof(a); i++) {
-		printf("%x", a[i]);
-		printf(" ");
-	}
-	test2(a);
-	printf("###########\n");
-	for (i = 0; i < sizeof(a); i++) {
-		printf("%x", a[i]);
-		printf(" ");
-	}
+	test1();
+
 	getchar();
 	return 0;
 }
