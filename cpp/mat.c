@@ -531,7 +531,7 @@ void data_analysis_v2(POINT *xy, int len, POINT *pxy)
 
 static void data_conver(POINT *xy,POINT *pxy,int len)
 {
-
+	variance_analysis(xy, len);
 	POINT b[4];
 	memset(b, 0, sizeof(b));
 	POINT *xy_temp;

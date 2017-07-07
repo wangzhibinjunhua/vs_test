@@ -1,12 +1,16 @@
 package com.wzb.helloworld;
 
 import java.util.ArrayList;
+import java.util.IllegalFormatCodePointException;
 /**
  * @author wzb<wangzhibin_x@qq.com>
- * @date Jun 3, 2017 9:02:55 AM	
+ * @date Jun 3, 2017 9:02:55 AM
  */
 
 public class Mat {
+	
+	static int width = 15;
+	static int height = 28;
 
 	public static void swap(ArrayList<Point> xy, int i, int j) {
 		float x=xy.get(i).getX();
@@ -79,27 +83,25 @@ public class Mat {
 				base = i;
 			}
 		}
-		
-		System.out.println("base="+base);
 
 		swap(arr, base, 0);
-		
+
 
 		vectorsort(arr, 1, len - 1);
-		
+
 
 		top = 1;
 		for (i = 2; i < len; i++) {
 			while (top > 0 && getcross(arr.get(top - 1), arr.get(top), arr.get(i)) <= 0) {
 				top--;
 			}
-			
+
 			++top;
 			int temp=top;
 			arr.get(temp).setX(arr.get(i).getX());
 			arr.get(temp).setY(arr.get(i).getY());
 		}
-		
+
 		n.get(0).setN(top);
 
 	}
@@ -124,9 +126,9 @@ public class Mat {
 		}
 		arr.get(ret).setX(arr.get(0).getX());
 		arr.get(ret).setY(arr.get(0).getY());
-		
 
-			
+
+
 		downlast = down;
 		rightlast = right;
 		uplast = up;
@@ -172,6 +174,7 @@ public class Mat {
 			}
 		}
 
+		System.out.println("last down right up left:"+downlast+","+rightlast+","+uplast+","+leftlast);
 		// 计算外接矩形
 		if (arr.get(downlast + 1).getY() == arr.get(downlast).getY()) {
 			rectangle.get(0).setX(arr.get(leftlast).getX());
@@ -252,7 +255,7 @@ public class Mat {
 		if (xy.get(0).getY() < (avey - 2 * stdy)) xy.get(0).setY(avey);
 
 		for (i = 1; i < len; i++) {
-			
+
 			if (xy.get(i).getX()>(avex + 2 * stdx)) xy.get(i).setX(xy.get(i-1).getX());
 			if (xy.get(i).getX() < (avex - 2 * stdx)) xy.get(i).setX(xy.get(i-1).getX());
 
@@ -264,38 +267,105 @@ public class Mat {
 
 	}
 	
-	public static void data_analysis(ArrayList<Point> xy, int len, ArrayList<Point> pxy)
+	public static void variance_analysis_v2(ArrayList<Point> xy,int index,int len)
 	{
 		int i;
+		float sumx=0.0f,sumy=0.0f,avex=0.0f,avey=0.0f,varx=0.0f,vary=0.0f,stdx=0.0f,stdy=0.0f;
+		for (i = index; i < len+index; i++) {
+			sumx += xy.get(i).getX();
+			sumy += xy.get(i).getY();
+		}
 
-		variance_analysis(xy, len);
-		ArrayList<Point> b=new ArrayList<Point>(){{add(new Point(1f,1f));add(new Point(1f,1f));add(new Point(1f,1f));add(new Point(1f,1f));}};
+		//平均值
+		avex = sumx / len;
+		avey = sumy / len;
+
+		for (i = index; i < len+index; i++) {
+			varx += (xy.get(i).getX() - avex)*(xy.get(i).getX() - avex);
+			vary += (xy.get(i).getY() - avey)*(xy.get(i).getY() - avey);
+		}
+		//方差
+		varx = varx / len;
+		vary = vary / len;
+
+		//标准差
+		stdx = (float)Math.sqrt(varx);
+		stdy = (float)Math.sqrt(vary);
+
+		//printf("stdx=%f,stdy=%f,avex=%f,avey=%f\n", stdx, stdy, avex, avey);
+
+		if (xy.get(index).getX()>(avex + 2 * stdx)) xy.get(index).setX(avex);
+		if (xy.get(index).getX() < (avex - 2 * stdx))xy.get(index).setX(avex);
+
+		if (xy.get(index).getY() > (avey + 2 * stdy)) xy.get(index).setY(avey);
+		if (xy.get(index).getY() < (avey - 2 * stdy)) xy.get(index).setY(avey);
+
+		for (i = index+1; i < len+index; i++) {
+
+			if (xy.get(i).getX()>(avex + 2 * stdx)) xy.get(i).setX(xy.get(i-1).getX());
+			if (xy.get(i).getX() < (avex - 2 * stdx)) xy.get(i).setX(xy.get(i-1).getX());
+
+			if (xy.get(i).getY() > (avey + 2 * stdy)) xy.get(i).setY(xy.get(i-1).getY());
+			if (xy.get(i).getY() < (avey - 2 * stdy)) xy.get(i).setY(xy.get(i-1).getY());
+		}
+
+
+
+	}
 	
+	static int is_full(ArrayList<Point> xy,int len){
+		
+		int i;
+		
+		variance_analysis(xy, len);
+		Point min=new Point(xy.get(0).getX(),xy.get(0).getY());
+		Point max=new Point(xy.get(0).getX(),xy.get(0).getY());
+		for(i=1;i<len;i++){
+			if(xy.get(i).getX()>max.getX()) max.setX(xy.get(i).getX());
+			if(xy.get(i).getY()>max.getY()) max.setY(xy.get(i).getY());
+			
+			if(xy.get(i).getX()<min.getX())min.setX(xy.get(i).getX());
+			if(xy.get(i).getY()<min.getY())min.setY(xy.get(i).getY());
+		}
+		
+		if(max.getX()-min.getX()>22 || max.getY()-min.getY()>22){
+			return 1;
+		}
+		
+		return 0;
+	}
+	
+	static void data_conver(ArrayList<Point> xy,ArrayList<Point> pxy,int index,int len){
+		
+		int i;
+		variance_analysis_v2(xy,index, len);
+		ArrayList<Point> b=new ArrayList<Point>(){{add(new Point(1f,1f));add(new Point(1f,1f));add(new Point(1f,1f));add(new Point(1f,1f));}};
+
 
 		ArrayList<Point> xy_temp=new ArrayList<Point>();
-		for(i=0;i<len;i++){
+		for(i=index;i<len+index;i++){
 			Point point=new Point(xy.get(i).getX(),xy.get(i).getY());
 			xy_temp.add(point);
 		}
-	
+
 		rotatingcalipers(xy_temp, len, b);
-		
+
 		for(i=0;i<b.size();i++){
 			System.out.println("b:"+b.get(i).getX()+","+b.get(i).getY());
 		}
-
+		
 		Point max_y=new Point(0.0f,0.0f);
 		Point min_x=new Point(0.0f,0.0f);
 		Point min_y=new Point(0.0f,0.0f);
 		max_y.setY(b.get(0).getY());
 		max_y.setX(b.get(0).getX());
-		
+
 		min_x.setY(b.get(0).getY());
 		min_x.setX(b.get(0).getX());
-	
+
 		min_y.setY(b.get(0).getY());
 		min_y.setX(b.get(0).getX());
-		
+
 
 		for (i = 0; i < 4; i++) {
 			if (max_y.getY() < b.get(i).getY()) {
@@ -316,7 +386,7 @@ public class Mat {
 				min_y.setX(b.get(i).getX());
 			}
 		}
-		
+
 		float sin_yaw,cos_yaw;
 		if(min_x.getY()==min_y.getY()){
 			sin_yaw=0;
@@ -326,11 +396,162 @@ public class Mat {
 			cos_yaw = (max_y.getY() - min_x.getY()) / getdist(min_x, max_y);
 		}
 
+
+		for (i = index; i < len+index; i++) {
+			pxy.get(i).setX(xy.get(i).getX()*cos_yaw - xy.get(i).getY()*sin_yaw);
+			pxy.get(i).setY(xy.get(i).getY()*cos_yaw + xy.get(i).getX()*sin_yaw);
+
+
+		}
+
+		Point p_max_y=new Point();
+		Point p_min_x=new Point();
+		Point p_min_y=new Point();
+		p_max_y.setX(max_y.getX()*cos_yaw - max_y.getY()*sin_yaw);
+		p_max_y.setY(max_y.getY()*cos_yaw + max_y.getX()*sin_yaw);
+
+		p_min_x.setX( min_x.getX()*cos_yaw - min_x.getY()*sin_yaw);
+		p_min_x.setY( min_x.getY()*cos_yaw + min_x.getX()*sin_yaw);
+
+		p_min_y.setX(min_y.getX()*cos_yaw - min_y.getY()*sin_yaw);
+		p_min_y.setY(min_y.getY()*cos_yaw + min_y.getX()*sin_yaw);
+
+		if ((p_max_y.getY() - p_min_x.getY()) > (p_min_y.getX() - p_min_x.getX())) {
+			for (i = index; i < len+index; i++) {
+				pxy.get(i).setX(pxy.get(i).getX()- p_min_x.getX()+0.1f);
+				pxy.get(i).setY(pxy.get(i).getY()- p_min_x.getY()+0.1f);
+				float temp;
+				temp = pxy.get(i).getX();
+				pxy.get(i).setX(pxy.get(i).getY());
+				pxy.get(i).setY(temp);
+				
+				if(p_max_y.getY()-p_min_y.getY()>height){
+					pxy.get(i).setX(pxy.get(i).getX()*height/(p_max_y.getY()-p_min_y.getY()));
+				}
+				
+				if(p_min_y.getX()-p_min_x.getX()>width){
+					pxy.get(i).setY(pxy.get(i).getY()*width/(p_min_y.getX()-p_min_x.getX()));
+				}
+
+			}
+		}
+		else {
+			for (i = index; i < len+index; i++) {
+				pxy.get(i).setX(pxy.get(i).getX()- p_min_x.getX()+0.1f);
+				pxy.get(i).setY(pxy.get(i).getY()- p_min_x.getY()+0.1f);
+				
+				if(p_min_y.getX()-p_min_x.getX()>height){
+					pxy.get(i).setX(pxy.get(i).getX()*height/(p_min_y.getX()-p_min_x.getX()));
+				}
+				
+				if(p_max_y.getY()-p_min_y.getY()>width){
+					pxy.get(i).setY(pxy.get(i).getY()*width/(p_max_y.getY()-p_min_y.getY()));
+				}
+			}
+		}
+
+		
+	}
 	
+	public static void data_analysis_v2(ArrayList<Point> xy, int len, ArrayList<Point> pxy){
+		int full=0;
+		int i;
+		if(len>100){
+			full=is_full(xy, len);
+			if (full == 0) {
+				width = 15;
+				height = 14;
+			}
+			else {
+				width = 15;
+				height = 28;
+			}
+			
+			for(i=0;i<len/100;i++){
+				data_conver(xy, pxy, i*100, 100);
+			}
+			data_conver(xy, pxy, len-len%100, len%100);
+		}else{
+			full=is_full(xy, len);
+			if (full == 0) {
+				width = 15;
+				height = 14;
+			}
+			else {
+				width = 15;
+				height = 28;
+			}
+			data_conver(xy, pxy,0, len);
+		}
+	}
+
+	public static void data_analysis(ArrayList<Point> xy, int len, ArrayList<Point> pxy)
+	{
+		int i;
+
+		variance_analysis(xy, len);
+		ArrayList<Point> b=new ArrayList<Point>(){{add(new Point(1f,1f));add(new Point(1f,1f));add(new Point(1f,1f));add(new Point(1f,1f));}};
+
+
+		ArrayList<Point> xy_temp=new ArrayList<Point>();
+		for(i=0;i<len;i++){
+			Point point=new Point(xy.get(i).getX(),xy.get(i).getY());
+			xy_temp.add(point);
+		}
+
+		rotatingcalipers(xy_temp, len, b);
+
+		for(i=0;i<b.size();i++){
+			System.out.println("b:"+b.get(i).getX()+","+b.get(i).getY());
+		}
+
+		Point max_y=new Point(0.0f,0.0f);
+		Point min_x=new Point(0.0f,0.0f);
+		Point min_y=new Point(0.0f,0.0f);
+		max_y.setY(b.get(0).getY());
+		max_y.setX(b.get(0).getX());
+
+		min_x.setY(b.get(0).getY());
+		min_x.setX(b.get(0).getX());
+
+		min_y.setY(b.get(0).getY());
+		min_y.setX(b.get(0).getX());
+
+
+		for (i = 0; i < 4; i++) {
+			if (max_y.getY() < b.get(i).getY()) {
+
+				max_y.setY(b.get(i).getY());
+				max_y.setX(b.get(i).getX());
+			}
+
+			if (min_x.getX() > b.get(i).getX()) {
+
+				min_x.setY(b.get(i).getY());
+				min_x.setX(b.get(i).getX());
+			}
+
+			if (min_y.getY() >= b.get(i).getY()) {
+
+				min_y.setY(b.get(i).getY());
+				min_y.setX(b.get(i).getX());
+			}
+		}
+
+		float sin_yaw,cos_yaw;
+		if(min_x.getY()==min_y.getY()){
+			sin_yaw=0;
+			cos_yaw=1;
+		}else{
+			sin_yaw = (max_y.getX() - min_x.getX()) / getdist(min_x, max_y);
+			cos_yaw = (max_y.getY() - min_x.getY()) / getdist(min_x, max_y);
+		}
+
+
 		for (i = 0; i < len; i++) {
 			pxy.get(i).setX(xy.get(i).getX()*cos_yaw - xy.get(i).getY()*sin_yaw);
 			pxy.get(i).setY(xy.get(i).getY()*cos_yaw + xy.get(i).getX()*sin_yaw);
-			
+
 
 		}
 
@@ -355,7 +576,7 @@ public class Mat {
 				pxy.get(i).setX(pxy.get(i).getY());
 				pxy.get(i).setY(temp);
 
-				
+
 			}
 		}
 		else {
