@@ -320,7 +320,9 @@ public class Mat {
 		variance_analysis(xy, len);
 		Point min=new Point(xy.get(0).getX(),xy.get(0).getY());
 		Point max=new Point(xy.get(0).getX(),xy.get(0).getY());
-		for(i=1;i<len;i++){
+		int k=len>75?75:len;
+		int j=len>75?15:1;
+		for(i=j;i<k;i++){
 			if(xy.get(i).getX()>max.getX()) max.setX(xy.get(i).getX());
 			if(xy.get(i).getY()>max.getY()) max.setY(xy.get(i).getY());
 			
@@ -328,7 +330,7 @@ public class Mat {
 			if(xy.get(i).getY()<min.getY())min.setY(xy.get(i).getY());
 		}
 		
-		if(max.getX()-min.getX()>22 || max.getY()-min.getY()>22){
+		if(max.getX()-min.getX()>23 || max.getY()-min.getY()>23){
 			return 1;
 		}
 		
@@ -418,8 +420,8 @@ public class Mat {
 
 		if ((p_max_y.getY() - p_min_x.getY()) > (p_min_y.getX() - p_min_x.getX())) {
 			for (i = index; i < len+index; i++) {
-				pxy.get(i).setX(pxy.get(i).getX()- p_min_x.getX()+0.1f);
-				pxy.get(i).setY(pxy.get(i).getY()- p_min_x.getY()+0.1f);
+				pxy.get(i).setX(pxy.get(i).getX()- p_min_x.getX()+0.3f);
+				pxy.get(i).setY(pxy.get(i).getY()- p_min_x.getY()+0.3f);
 				float temp;
 				temp = pxy.get(i).getX();
 				pxy.get(i).setX(pxy.get(i).getY());
@@ -437,8 +439,8 @@ public class Mat {
 		}
 		else {
 			for (i = index; i < len+index; i++) {
-				pxy.get(i).setX(pxy.get(i).getX()- p_min_x.getX()+0.1f);
-				pxy.get(i).setY(pxy.get(i).getY()- p_min_x.getY()+0.1f);
+				pxy.get(i).setX(pxy.get(i).getX()- p_min_x.getX()+0.3f);
+				pxy.get(i).setY(pxy.get(i).getY()- p_min_x.getY()+0.3f);
 				
 				if(p_min_y.getX()-p_min_x.getX()>height){
 					pxy.get(i).setX(pxy.get(i).getX()*height/(p_min_y.getX()-p_min_x.getX()));
