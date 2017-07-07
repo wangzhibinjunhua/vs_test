@@ -5,6 +5,9 @@
 #include <string.h>
 #include "mat.h"
 
+static int width = 15;
+static int height = 28;
+static void data_conver(POINT *xy, POINT *pxy, int len);
 
 static void
 swap(POINT *arr, int a, int b)
@@ -464,6 +467,178 @@ void save_file(char *filename,POINT *data,int len) {
 	fclose(file);
 }
 
+
+static int is_full(POINT *xy,int len)
+{
+	int i;
+	POINT min, max;
+	variance_analysis(xy, len);
+	min.x = xy[0].x;
+	min.y = xy[0].y;
+	max.x = xy[0].x;
+	max.y = xy[0].y;
+	for (i = 1; i < len; i++) {
+		if (xy[i].x>max.x)max.x = xy[i].x;
+		if (xy[i].y>max.y)max.y = xy[i].y;
+
+		if (xy[i].x < min.x)min.x = xy[i].x;
+		if (xy[i].y < min.y)min.y = xy[i].x;
+	}
+
+	if (max.x - min.x>22 || max.y - min.y>22) {
+		return 1;
+	}
+
+	return 0;
+}
+
+void data_analysis_v2(POINT *xy, int len, POINT *pxy) 
+{
+	int full = 0;
+	if (len > 100) {
+		full = is_full(xy, 100);
+		if (full == 0) {
+			width = 15;
+			height = 14;
+		}
+		else {
+			width = 15;
+			height = 28;
+		}
+
+		int i;
+		for (i = 0; i < len / 100; i++) {
+			printf("i=%d\n", i);
+			data_conver(xy+i*100, pxy+i*100, 100);
+		}
+		data_conver(xy + len - len % 100, pxy + len - len % 100, len % 100);
+	}
+	else {
+		full = is_full(xy, len);
+		if (full == 0) {
+			width = 15;
+			height = 14;
+		}
+		else {
+			width = 15;
+			height = 28;
+		}
+		data_conver(xy, pxy, len);
+	}
+
+	
+}
+
+static void data_conver(POINT *xy,POINT *pxy,int len)
+{
+
+	POINT b[4];
+	memset(b, 0, sizeof(b));
+	POINT *xy_temp;
+	xy_temp = (POINT*)malloc(len*sizeof(POINT));
+	memset(xy_temp, 0, len * sizeof(POINT));
+	memcpy(xy_temp, xy, sizeof(POINT)*len);
+	rotatingcalipers(xy_temp, len, b);
+	free(xy_temp);
+	xy_temp = NULL;
+	int i;
+	for (i = 0; i < 4; i++) {
+		printf("b:[%f, %f] ", b[i].x, b[i].y);
+	}
+	POINT max_y, min_x, min_y;
+	max_y.y = b[0].y;
+	max_y.x = b[0].x;
+	min_x.x = b[0].x;
+	min_x.y = b[0].y;
+	min_y.y = b[0].y;
+	min_y.x = b[0].x;
+	for (i = 0; i < 4; i++) {
+		if (max_y.y < b[i].y) {
+			max_y.y = b[i].y;
+			max_y.x = b[i].x;
+		}
+
+		if (min_x.x > b[i].x) {
+			min_x.x = b[i].x;
+			min_x.y = b[i].y;
+		}
+		if (min_y.y >= b[i].y) {
+			min_y.y = b[i].y;
+			min_y.x = b[i].x;
+		}
+
+	}
+
+	float sin_yaw, cos_yaw;
+	if (min_x.y == min_y.y) {
+		sin_yaw = 0;
+		cos_yaw = 1;
+	}
+	else {
+		sin_yaw = (max_y.x - min_x.x) / getdist(min_x, max_y);
+		cos_yaw = (max_y.y - min_x.y) / getdist(min_x, max_y);
+	}
+
+
+	for (i = 0; i < len; i++) {
+		pxy[i].x = xy[i].x*cos_yaw - xy[i].y*sin_yaw;
+		pxy[i].y = xy[i].y*cos_yaw + xy[i].x*sin_yaw;
+
+	}
+
+	POINT p_max_y, p_min_x, p_min_y;
+	p_max_y.x = max_y.x*cos_yaw - max_y.y*sin_yaw;
+	p_max_y.y = max_y.y*cos_yaw + max_y.x*sin_yaw;
+
+	p_min_x.x = min_x.x*cos_yaw - min_x.y*sin_yaw;
+	p_min_x.y = min_x.y*cos_yaw + min_x.x*sin_yaw;
+
+
+	p_min_y.x = min_y.x*cos_yaw - min_y.y*sin_yaw;
+	p_min_y.y = min_y.y*cos_yaw + min_y.x*sin_yaw;
+
+	if ((p_max_y.y - p_min_x.y) > (p_min_y.x - p_min_x.x)) {
+		for (i = 0; i < len; i++) {
+
+
+			//if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.1f;
+			//if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.1f;
+			pxy[i].x -= p_min_x.x - 0.1f;
+			pxy[i].y -= p_min_x.y - 0.1f;
+			float temp;
+			temp = pxy[i].x;
+			pxy[i].x = pxy[i].y;
+			pxy[i].y = temp;
+
+			if (p_max_y.y - p_min_x.y>height) {
+				pxy[i].x = pxy[i].x*height / (p_max_y.y - p_min_x.y);
+			}
+
+			if (p_min_y.x - p_min_x.x>width) {
+				pxy[i].y = pxy[i].y*width / (p_min_y.x - p_min_x.x);
+			}
+
+		}
+	}
+	else {
+		printf("1111\n");
+		for (i = 0; i < len; i++) {
+			//if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.1f;
+			//if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.1f;
+			pxy[i].x -= p_min_x.x - 0.1f;
+			pxy[i].y -= p_min_x.y - 0.1f;
+			if (p_min_y.x - p_min_x.x>height) {
+				pxy[i].x = pxy[i].x*height / (p_min_y.x - p_min_x.x);
+			}
+
+			if (p_max_y.y - p_min_x.y>width) {
+				pxy[i].y = pxy[i].y*width / (p_max_y.y - p_min_x.y);
+			}
+		}
+	}
+
+}
+
 void 
 data_analysis(POINT *xy, int len, POINT *pxy)
 {
@@ -544,8 +719,10 @@ data_analysis(POINT *xy, int len, POINT *pxy)
 		for (i = 0; i < len; i++) {
 
 
-			if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.1f;
-			if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.1f;
+			//if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.1f;
+			//if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.1f;
+			pxy[i].x -= p_min_x.x - 0.1f;
+			pxy[i].y -= p_min_x.y - 0.1f;
 
 			float temp;
 			temp = pxy[i].x;
@@ -557,8 +734,10 @@ data_analysis(POINT *xy, int len, POINT *pxy)
 	else {
 		printf("1111\n");
 		for (i = 0; i < len; i++) {
-			if (p_min_x.x < 0)pxy[i].x -= p_min_x.x-0.1f;
-			if (p_min_x.y < 0)pxy[i].y -= p_min_x.y-0.1f;
+			//if (p_min_x.x < 0)pxy[i].x -= p_min_x.x-0.1f;
+			//if (p_min_x.y < 0)pxy[i].y -= p_min_x.y-0.1f;
+			pxy[i].x -= p_min_x.x - 0.1f;
+			pxy[i].y -= p_min_x.y - 0.1f;
 		}
 	}
 
