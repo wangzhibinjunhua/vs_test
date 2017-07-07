@@ -477,18 +477,22 @@ static int is_full(POINT *xy,int len)
 	min.y = xy[0].y;
 	max.x = xy[0].x;
 	max.y = xy[0].y;
-	for (i = 1; i < len; i++) {
+	int k = len > 75 ? 75 : len;
+	int j = len > 75 ? 15 : 0;
+	for (i = j; i < k; i++) {
 		if (xy[i].x>max.x)max.x = xy[i].x;
 		if (xy[i].y>max.y)max.y = xy[i].y;
 
 		if (xy[i].x < min.x)min.x = xy[i].x;
-		if (xy[i].y < min.y)min.y = xy[i].x;
+		if (xy[i].y < min.y)min.y = xy[i].y;
 	}
 
-	if (max.x - min.x>22 || max.y - min.y>22) {
+	printf("wzb minx=%f,maxx=%f,miny=%f,maxy=%f\n", min.x, max.x, min.y, max.y);
+	if (max.x - min.x>23 || max.y - min.y>23) {
+		printf("##########full#########\n");
 		return 1;
 	}
-
+	printf("##########half#########\n");
 	return 0;
 }
 
@@ -603,8 +607,8 @@ static void data_conver(POINT *xy,POINT *pxy,int len)
 
 			//if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.1f;
 			//if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.1f;
-			pxy[i].x -= p_min_x.x - 0.1f;
-			pxy[i].y -= p_min_x.y - 0.1f;
+			pxy[i].x -= p_min_x.x - 0.3f;
+			pxy[i].y -= p_min_x.y - 0.3f;
 			float temp;
 			temp = pxy[i].x;
 			pxy[i].x = pxy[i].y;
@@ -625,8 +629,8 @@ static void data_conver(POINT *xy,POINT *pxy,int len)
 		for (i = 0; i < len; i++) {
 			//if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.1f;
 			//if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.1f;
-			pxy[i].x -= p_min_x.x - 0.1f;
-			pxy[i].y -= p_min_x.y - 0.1f;
+			pxy[i].x -= p_min_x.x - 0.3f;
+			pxy[i].y -= p_min_x.y - 0.3f;
 			if (p_min_y.x - p_min_x.x>height) {
 				pxy[i].x = pxy[i].x*height / (p_min_y.x - p_min_x.x);
 			}
@@ -721,8 +725,8 @@ data_analysis(POINT *xy, int len, POINT *pxy)
 
 			//if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.1f;
 			//if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.1f;
-			pxy[i].x -= p_min_x.x - 0.1f;
-			pxy[i].y -= p_min_x.y - 0.1f;
+			pxy[i].x -= p_min_x.x - 0.3f;
+			pxy[i].y -= p_min_x.y - 0.3f;
 
 			float temp;
 			temp = pxy[i].x;
@@ -736,8 +740,8 @@ data_analysis(POINT *xy, int len, POINT *pxy)
 		for (i = 0; i < len; i++) {
 			//if (p_min_x.x < 0)pxy[i].x -= p_min_x.x-0.1f;
 			//if (p_min_x.y < 0)pxy[i].y -= p_min_x.y-0.1f;
-			pxy[i].x -= p_min_x.x - 0.1f;
-			pxy[i].y -= p_min_x.y - 0.1f;
+			pxy[i].x -= p_min_x.x - 0.3f;
+			pxy[i].y -= p_min_x.y - 0.3f;
 		}
 	}
 

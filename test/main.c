@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 
 	init_step_env();
 
-	char *filename = "e:/python-project/test/num/ao_04_01.txt";
+	char *filename = "e:/python-project/test/num/ao_02_01.txt";
 	ReadCsvData(filename);           
 	//ShowCsvData();     
 	fopen_s(&file, "xy.txt", "w+");
