@@ -57,7 +57,7 @@ void test_findsp()
 void test_mat()
 {
 	int n, i, length;
-	char *filename = "e:/python-project/test/num/xy_wzb07072half.txt";
+	char *filename = "e:/python-project/test/num/xy_gx07083full.txt";
 	ReadCsvData(filename);
 	printf("giNumRow=%d,giNumCol=%d\n", giNumRow, giNumCol);
 

@@ -470,9 +470,15 @@ public class Mat {
 			}
 			
 			for(i=0;i<len/100;i++){
-				data_conver(xy, pxy, i*100, 100);
+				if(len-i*100>104){
+					data_conver(xy, pxy, i*100, 100);
+				}else{
+					data_conver(xy, pxy, i*100, 100+len%100);
+				}
 			}
-			data_conver(xy, pxy, len-len%100, len%100);
+			if(len%100>4){
+				data_conver(xy, pxy, len-len%100, len%100);
+			}
 		}else{
 			full=is_full(xy, len);
 			if (full == 0) {

@@ -513,9 +513,19 @@ void data_analysis_v2(POINT *xy, int len, POINT *pxy)
 		int i;
 		for (i = 0; i < len / 100; i++) {
 			printf("i=%d\n", i);
-			data_conver(xy+i*100, pxy+i*100, 100);
+			if (len - i * 100 > 104) {
+				data_conver(xy + i * 100, pxy + i * 100, 100);
+				//is_full(xy + i * 100, 100, 1);
+
+			}
+			else {
+				data_conver(xy + i * 100, pxy + i * 100, 100+len%100);
+				//is_full(xy + i * 100, 100, 1);
+			}
 		}
-		data_conver(xy + len - len % 100, pxy + len - len % 100, len % 100);
+		if (len % 100 > 4) {
+			data_conver(xy + len - len % 100, pxy + len - len % 100, len % 100);
+		}
 	}
 	else {
 		full = is_full(xy, len);
