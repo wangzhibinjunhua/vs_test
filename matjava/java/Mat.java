@@ -459,7 +459,7 @@ public class Mat {
 		int full=0;
 		int i;
 		if(len>100){
-			full=is_full(xy, len);
+			full=is_full(xy, 100);
 			if (full == 0) {
 				width = 15;
 				height = 14;

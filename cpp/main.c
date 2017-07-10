@@ -57,7 +57,7 @@ void test_findsp()
 void test_mat()
 {
 	int n, i, length;
-	char *filename = "e:/python-project/test/num/xy_gx07083full.txt";
+	char *filename = "e:/python-project/test/num/xy_0710.txt";
 	ReadCsvData(filename);
 	printf("giNumRow=%d,giNumCol=%d\n", giNumRow, giNumCol);
 
@@ -101,7 +101,7 @@ void test_mat()
 	memset(new_data, 0, sizeof(POINT)*giNumRow);
 	data_analysis_v2(old_data, giNumRow,new_data);
 	FILE *file;
-	fopen_s(&file, "newxy_xcl07071half.txt", "w+");
+	fopen_s(&file, "newxy.txt", "w+");
 	for (i = 0; i < giNumRow; i++) {
 		fprintf(file, "%f", new_data[i].x);
 		fprintf(file, "%s", ",");

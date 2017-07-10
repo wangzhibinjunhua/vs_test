@@ -141,6 +141,7 @@ rotatingcalipers(POINT *arr, int len, POINT *rectangle)
 				up = (up + 1) % top;
 			}
 
+
 			// find down
 			if (down == 0) {
 				left = up;
@@ -546,6 +547,10 @@ void data_analysis_v2(POINT *xy, int len, POINT *pxy)
 static void data_conver(POINT *xy,POINT *pxy,int len)
 {
 	variance_analysis(xy, len);
+	if (len == 5) {
+		for (int i = 0; i < len; i++)
+			printf("x:%f,y:%f\n", xy[i].x, xy[i].y);
+	}
 	POINT b[4];
 	memset(b, 0, sizeof(b));
 	POINT *xy_temp;
