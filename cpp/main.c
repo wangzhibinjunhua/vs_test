@@ -57,7 +57,7 @@ void test_findsp()
 void test_mat()
 {
 	int n, i, length;
-	char *filename = "e:/python-project/test/num/xy_0710.txt";
+	char *filename = "e:/python-project/test/num/xy_wzb07081half.txt";
 	ReadCsvData(filename);
 	printf("giNumRow=%d,giNumCol=%d\n", giNumRow, giNumCol);
 
@@ -99,7 +99,7 @@ void test_mat()
 	POINT *new_data;
 	new_data= (POINT*)malloc(N);
 	memset(new_data, 0, sizeof(POINT)*giNumRow);
-	data_analysis_v2(old_data, giNumRow,new_data);
+	data_analysis_v3(old_data, giNumRow,new_data,0);
 	FILE *file;
 	fopen_s(&file, "newxy.txt", "w+");
 	for (i = 0; i < giNumRow; i++) {
@@ -118,14 +118,11 @@ void test_mat()
 
 void test1()
 {
-	int a = 5;
-	if (a < 7) {
-		printf("te111\n");
-	}
-	else if (a < 10) {
-		printf("te222\n");
-	}
-	printf("\n");
+	POINT a, new_a;
+	a.x = 12.0;
+	a.y = 9;
+	new_a = a;
+	printf("%f,%f\n", new_a.x, new_a.y);
 }
 
 void test2(char *b) {

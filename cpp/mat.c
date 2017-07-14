@@ -8,6 +8,7 @@
 static int width = 15;
 static int height = 28;
 static void data_conver(POINT *xy, POINT *pxy, int len);
+static void data_conver_v2(POINT *xy, POINT *pxy, int len);
 
 static void
 swap(POINT *arr, int a, int b)
@@ -544,13 +545,230 @@ void data_analysis_v2(POINT *xy, int len, POINT *pxy)
 	
 }
 
-static void data_conver(POINT *xy,POINT *pxy,int len)
+void data_analysis_v3(POINT *xy, int len, POINT *pxy,int full)
+{
+	if (full == 0) {
+		width = 15;
+		height = 14;
+	}
+	else {
+		width = 15;
+		height = 28;
+	}
+	if (len > 100) {
+		int i;
+		for (i = 0; i < len / 100; i++) {
+			printf("i=%d\n", i);
+			if (len - i * 100 > 104) {
+				data_conver_v2(xy + i * 100, pxy + i * 100, 100);
+				//is_full(xy + i * 100, 100, 1);
+
+			}
+			else {
+				data_conver_v2(xy + i * 100, pxy + i * 100, 100 + len % 100);
+				//is_full(xy + i * 100, 100, 1);
+			}
+		}
+		if (len % 100 > 4) {
+			data_conver_v2(xy + len - len % 100, pxy + len - len % 100, len % 100);
+		}
+	}
+	else {
+		data_conver_v2(xy, pxy, len);
+	}
+
+
+}
+
+static void data_conver_v2(POINT *xy,POINT *pxy,int len)
 {
 	variance_analysis(xy, len);
 	if (len == 5) {
 		for (int i = 0; i < len; i++)
 			printf("x:%f,y:%f\n", xy[i].x, xy[i].y);
 	}
+	POINT b[4];
+	memset(b, 0, sizeof(b));
+	POINT *xy_temp;
+	xy_temp = (POINT*)malloc(len*sizeof(POINT));
+	memset(xy_temp, 0, len * sizeof(POINT));
+	memcpy(xy_temp, xy, sizeof(POINT)*len);
+	rotatingcalipers(xy_temp, len, b);
+	free(xy_temp);
+	xy_temp = NULL;
+	int i;
+	for (i = 0; i < 4; i++) {
+		printf("b:[%f, %f] ", b[i].x, b[i].y);
+	}
+	POINT max_y, min_x, min_y,max_x;
+	max_y.y = b[0].y;
+	max_y.x = b[0].x;
+	max_x.y = b[0].y;
+	max_x.x = b[0].x;
+	min_x.x = b[0].x;
+	min_x.y = b[0].y;
+	min_y.y = b[0].y;
+	min_y.x = b[0].x;
+	for (i = 0; i < 4; i++) {
+		if (max_y.y < b[i].y) {
+			max_y.y = b[i].y;
+			max_y.x = b[i].x;
+		}
+		if (max_y.y == b[i].y && max_y.x>b[i].x) {
+			max_y.y = b[i].y;
+			max_y.x = b[i].x;
+		}
+
+		if (max_x.x < b[i].x) {
+			max_x.x = b[i].x;
+			max_x.y = b[i].y;
+		}
+		if (max_x.x == b[i].x && max_x.y < b[i].y) {
+			max_x.x = b[i].x;
+			max_x.y = b[i].y;
+		}
+
+		if (min_x.x > b[i].x) {
+			min_x.x = b[i].x;
+			min_x.y = b[i].y;
+		}
+		if (min_x.x == b[i].x && min_x.y>b[i].y) {
+			min_x.x = b[i].x;
+			min_x.y = b[i].y;
+		}
+
+		if (min_y.y >b[i].y) {
+			min_y.y = b[i].y;
+			min_y.x = b[i].x;
+		}
+
+		if (min_y.y == b[i].y && min_y.x < b[i].x) {
+			min_y.y = b[i].y;
+			min_y.x = b[i].x;
+		}
+
+	}
+
+	float sin_yaw, cos_yaw;
+	if (min_x.y == min_y.y) {
+		sin_yaw = 0;
+		cos_yaw = 1;
+	}
+	else {
+		sin_yaw = (max_y.x - min_x.x) / getdist(min_x, max_y);
+		cos_yaw = (max_y.y - min_x.y) / getdist(min_x, max_y);
+	}
+
+
+	for (i = 0; i < len; i++) {
+		pxy[i].x = xy[i].x*cos_yaw - xy[i].y*sin_yaw;
+		pxy[i].y = xy[i].y*cos_yaw + xy[i].x*sin_yaw;
+
+	}
+
+	POINT p_max_y, p_min_x, p_min_y,p_max_x;
+	p_max_y.x = max_y.x*cos_yaw - max_y.y*sin_yaw;
+	p_max_y.y = max_y.y*cos_yaw + max_y.x*sin_yaw;
+
+	p_max_x.x = max_x.x*cos_yaw - max_x.y*sin_yaw;
+	p_max_x.y = max_x.y*cos_yaw + max_x.x*sin_yaw;
+
+	p_min_x.x = min_x.x*cos_yaw - min_x.y*sin_yaw;
+	p_min_x.y = min_x.y*cos_yaw + min_x.x*sin_yaw;
+
+
+	p_min_y.x = min_y.x*cos_yaw - min_y.y*sin_yaw;
+	p_min_y.y = min_y.y*cos_yaw + min_y.x*sin_yaw;
+
+	POINT zero;
+	zero.x = 0;
+	zero.y = 0;
+	float s_p_min_x = getdist(p_min_x, zero);
+	float s_p_min_y = getdist(p_min_y, zero);
+	float s_p_max_x = getdist(p_max_x, zero);
+	float s_p_max_y = getdist(p_max_y, zero);
+
+	POINT new_p_max_y, new_p_min_x, new_p_min_y, new_p_max_x;
+	if (s_p_min_y<s_p_min_x && s_p_min_y <= s_p_max_x && s_p_min_y <= s_p_max_y) {
+		for (i = 0; i < len; i++) {
+			pxy[i].x = 2 * p_min_y.x - pxy[i].x;
+		}
+		new_p_min_x = p_min_y;
+		new_p_max_y = p_max_x;
+		new_p_min_y.y = p_min_x.y;
+		new_p_min_y.x = 2 * p_min_y.x - p_min_x.x;
+	}
+	else if (s_p_max_x<s_p_min_x && s_p_max_x <= s_p_min_y && s_p_max_x <= s_p_max_y) {
+		for (i = 0; i < len; i++) {
+			pxy[i].x = 2 * p_min_y.x - pxy[i].x;
+			pxy[i].y = 2 * p_max_x.y - pxy[i].y;
+		}
+		new_p_min_x = p_max_x;
+		new_p_max_y.x = p_min_y.y;
+		new_p_max_y.y = 2 * p_max_x.y - p_min_y.y;
+		new_p_min_y.y = p_max_x.y;
+		new_p_min_y.x = 2 * p_max_x.x - p_max_y.x;
+	}
+	else if (s_p_max_y<s_p_min_x && s_p_max_y <= s_p_min_y && s_p_max_y <= s_p_max_x) {
+		for (i = 0; i<len; i++) {
+			pxy[i].y = 2 * p_max_y.y - pxy[i].y;
+		}
+		new_p_min_x = p_max_y;
+		new_p_min_y = p_max_x;
+		new_p_max_y.x = p_max_y.x;
+		new_p_max_y.y = 2 * p_max_y.y - p_min_x.y;
+	}
+	else {
+		new_p_max_y = p_max_y;
+		new_p_min_x = p_min_x;
+		new_p_min_y = p_min_y;
+	}
+
+	if ((new_p_max_y.y - new_p_min_x.y) > (new_p_min_y.x - new_p_min_x.x) && (new_p_max_y.y - new_p_min_x.y)>15) {
+		for (i = 0; i < len; i++) {
+
+
+			//if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.1f;
+			//if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.1f;
+			pxy[i].x -= new_p_min_x.x - 0.3f;
+			pxy[i].y -= new_p_min_x.y - 0.3f;
+			float temp;
+			temp = pxy[i].x;
+			pxy[i].x = pxy[i].y;
+			pxy[i].y = temp;
+
+			if (new_p_max_y.y - new_p_min_x.y>height) {
+				pxy[i].x = pxy[i].x*height / (new_p_max_y.y - new_p_min_x.y);
+			}
+
+			if (new_p_min_y.x - new_p_min_x.x>width) {
+				pxy[i].y = pxy[i].y*width / (new_p_min_y.x - new_p_min_x.x);
+			}
+
+		}
+	}
+	else {
+		printf("1111\n");
+		for (i = 0; i < len; i++) {
+			//if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.1f;
+			//if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.1f;
+			pxy[i].x -= new_p_min_x.x - 0.3f;
+			pxy[i].y -= new_p_min_x.y - 0.3f;
+			if (new_p_min_y.x - new_p_min_x.x>height) {
+				pxy[i].x = pxy[i].x*height / (new_p_min_y.x - new_p_min_x.x);
+			}
+
+			if (new_p_max_y.y - new_p_min_x.y>width) {
+				pxy[i].y = pxy[i].y*width / (new_p_max_y.y - new_p_min_x.y);
+			}
+		}
+	}
+
+}
+
+static void data_conver(POINT *xy, POINT *pxy, int len)
+{
+	variance_analysis(xy, len);
 	POINT b[4];
 	memset(b, 0, sizeof(b));
 	POINT *xy_temp;
@@ -620,8 +838,6 @@ static void data_conver(POINT *xy,POINT *pxy,int len)
 		for (i = 0; i < len; i++) {
 
 
-			//if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.1f;
-			//if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.1f;
 			pxy[i].x -= p_min_x.x - 0.3f;
 			pxy[i].y -= p_min_x.y - 0.3f;
 			float temp;
@@ -633,7 +849,7 @@ static void data_conver(POINT *xy,POINT *pxy,int len)
 				pxy[i].x = pxy[i].x*height / (p_max_y.y - p_min_x.y);
 			}
 
-			if (p_min_y.x - p_min_x.x>width) {
+			if (p_min_y.x - p_min_x.x > width) {
 				pxy[i].y = pxy[i].y*width / (p_min_y.x - p_min_x.x);
 			}
 
@@ -642,15 +858,13 @@ static void data_conver(POINT *xy,POINT *pxy,int len)
 	else {
 		printf("1111\n");
 		for (i = 0; i < len; i++) {
-			//if (p_min_x.x < 0)pxy[i].x -= p_min_x.x - 0.1f;
-			//if (p_min_x.y < 0)pxy[i].y -= p_min_x.y - 0.1f;
 			pxy[i].x -= p_min_x.x - 0.3f;
 			pxy[i].y -= p_min_x.y - 0.3f;
 			if (p_min_y.x - p_min_x.x>height) {
 				pxy[i].x = pxy[i].x*height / (p_min_y.x - p_min_x.x);
 			}
 
-			if (p_max_y.y - p_min_x.y>width) {
+			if (p_max_y.y - p_min_x.y > width) {
 				pxy[i].y = pxy[i].y*width / (p_max_y.y - p_min_x.y);
 			}
 		}

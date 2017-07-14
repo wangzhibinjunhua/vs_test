@@ -302,11 +302,11 @@ public class Mat {
 
 		for (i = index+1; i < len+index; i++) {
 
-			if (xy.get(i).getX()>(avex + 2 * stdx)) xy.get(i).setX(xy.get(i-1).getX());
-			if (xy.get(i).getX() < (avex - 2 * stdx)) xy.get(i).setX(xy.get(i-1).getX());
+			if (xy.get(i).getX()>(avex + 2 * stdx)) xy.get(i).setX(xy.get(i-1).getX()-0.1f);
+			if (xy.get(i).getX() < (avex - 2 * stdx)) xy.get(i).setX(xy.get(i-1).getX()+0.1f);
 
-			if (xy.get(i).getY() > (avey + 2 * stdy)) xy.get(i).setY(xy.get(i-1).getY());
-			if (xy.get(i).getY() < (avey - 2 * stdy)) xy.get(i).setY(xy.get(i-1).getY());
+			if (xy.get(i).getY() > (avey + 2 * stdy)) xy.get(i).setY(xy.get(i-1).getY()-0.1f);
+			if (xy.get(i).getY() < (avey - 2 * stdy)) xy.get(i).setY(xy.get(i-1).getY()+0.1f);
 		}
 
 
@@ -453,6 +453,235 @@ public class Mat {
 		}
 
 		
+	}
+	
+static void data_conver_v2(ArrayList<Point> xy,ArrayList<Point> pxy,int index,int len){
+		
+		int i;
+		variance_analysis_v2(xy,index, len);
+		ArrayList<Point> b=new ArrayList<Point>(){{add(new Point(1f,1f));add(new Point(1f,1f));add(new Point(1f,1f));add(new Point(1f,1f));}};
+
+
+		ArrayList<Point> xy_temp=new ArrayList<Point>();
+		for(i=index;i<len+index;i++){
+			Point point=new Point(xy.get(i).getX(),xy.get(i).getY());
+			System.out.println("x:"+xy.get(i).getX()+" y:"+xy.get(i).getY());
+			xy_temp.add(point);
+		}
+
+		rotatingcalipers(xy_temp, len, b);
+
+		for(i=0;i<b.size();i++){
+			System.out.println("b:"+b.get(i).getX()+","+b.get(i).getY());
+		}
+		
+		Point max_y=new Point(b.get(0).getX(),b.get(0).getY());
+		Point max_x=new Point(b.get(0).getX(),b.get(0).getY());
+		Point min_x=new Point(b.get(0).getX(),b.get(0).getY());
+		Point min_y=new Point(b.get(0).getX(),b.get(0).getY());
+	
+
+
+		for (i = 0; i < 4; i++) {
+			if (max_y.getY() < b.get(i).getY()) {
+
+				max_y.setY(b.get(i).getY());
+				max_y.setX(b.get(i).getX());
+			}
+			if(max_y.getY()==b.get(i).getY() && b.get(i).getX()<max_y.getX()){
+				max_y.setY(b.get(i).getY());
+				max_y.setX(b.get(i).getX());
+			}
+			
+			if(max_x.getX()<b.get(i).getX()){
+				max_x.setX(b.get(i).getX());
+				max_x.setY(b.get(i).getY());
+			}
+			if(max_x.getX()==b.get(i).getX() && b.get(i).getY()>max_x.getY()){
+				max_x.setX(b.get(i).getX());
+				max_x.setY(b.get(i).getY());
+			}
+
+			if (min_x.getX() > b.get(i).getX()) {
+				min_x.setY(b.get(i).getY());
+				min_x.setX(b.get(i).getX());
+			}
+			if(min_x.getX()==b.get(i).getX() && b.get(i).getY()<min_x.getY()){
+				min_x.setY(b.get(i).getY());
+				min_x.setX(b.get(i).getX());
+			}
+
+			if (min_y.getY() > b.get(i).getY()) {
+				min_y.setY(b.get(i).getY());
+				min_y.setX(b.get(i).getX());
+			}
+			if(min_y.getY()==b.get(i).getY() && b.get(i).getX()>min_y.getX()){
+				min_y.setY(b.get(i).getY());
+				min_y.setX(b.get(i).getX());
+			}
+		}
+
+		float sin_yaw,cos_yaw;
+		if(min_x.getY()==min_y.getY()){
+			sin_yaw=0;
+			cos_yaw=1;
+		}else{
+			sin_yaw = (max_y.getX() - min_x.getX()) / getdist(min_x, max_y);
+			cos_yaw = (max_y.getY() - min_x.getY()) / getdist(min_x, max_y);
+		}
+
+
+		for (i = index; i < len+index; i++) {
+			pxy.get(i).setX(xy.get(i).getX()*cos_yaw - xy.get(i).getY()*sin_yaw);
+			pxy.get(i).setY(xy.get(i).getY()*cos_yaw + xy.get(i).getX()*sin_yaw);
+
+
+		}
+
+		Point p_max_y=new Point();
+		Point p_min_x=new Point();
+		Point p_min_y=new Point();
+		Point p_max_x=new Point();
+		p_max_y.setX(max_y.getX()*cos_yaw - max_y.getY()*sin_yaw);
+		p_max_y.setY(max_y.getY()*cos_yaw + max_y.getX()*sin_yaw);
+		
+		p_max_x.setX(max_x.getX()*cos_yaw - max_x.getY()*sin_yaw);
+		p_max_x.setY(max_x.getY()*cos_yaw + max_x.getX()*sin_yaw);
+
+		p_min_x.setX( min_x.getX()*cos_yaw - min_x.getY()*sin_yaw);
+		p_min_x.setY( min_x.getY()*cos_yaw + min_x.getX()*sin_yaw);
+
+		p_min_y.setX(min_y.getX()*cos_yaw - min_y.getY()*sin_yaw);
+		p_min_y.setY(min_y.getY()*cos_yaw + min_y.getX()*sin_yaw);
+		
+		Point zero=new Point(0.0f,0.0f);
+		float s_p_min_x = getdist(p_min_x, zero);
+		float s_p_min_y = getdist(p_min_y, zero);
+		float s_p_max_x = getdist(p_max_x, zero);
+		float s_p_max_y = getdist(p_max_y, zero);
+		
+		Point new_p_max_y=new Point();
+		Point new_p_min_x=new Point();
+		Point new_p_min_y=new Point();
+		
+		if (s_p_min_y<s_p_min_x && s_p_min_y <= s_p_max_x && s_p_min_y <= s_p_max_y) {
+			for (i = index; i < len+index; i++) {
+				pxy.get(i).setX(2*p_min_y.getX()-pxy.get(i).getX());
+			}
+			new_p_min_x.setX(p_min_y.getX());
+			new_p_min_x.setY(p_min_y.getY());
+			
+			new_p_max_y.setX(p_max_x.getX());
+			new_p_max_y.setY(p_max_x.getY());
+			
+			new_p_min_y.setY(p_min_x.getY());
+			new_p_min_y.setX(2*p_min_y.getX()-p_min_x.getX());
+			
+		}else if (s_p_max_x<s_p_min_x && s_p_max_x <= s_p_min_y && s_p_max_x <= s_p_max_y) {
+			for (i = index; i < len+index; i++) {
+				pxy.get(i).setX(2*p_min_y.getX()-pxy.get(i).getX());
+				pxy.get(i).setY(2*p_max_x.getY()-pxy.get(i).getY());
+			}
+			
+			new_p_min_x.setX(p_max_x.getX());
+			new_p_min_x.setY(p_max_x.getY());
+			
+			new_p_max_y.setX(p_min_y.getY());
+			new_p_max_y.setY(2*p_max_x.getY()-p_min_y.getY());
+			
+			new_p_min_y.setY(p_max_x.getY());
+			new_p_min_y.setX(2*p_max_x.getX()-p_max_y.getX());
+			
+		}else if (s_p_max_y<s_p_min_x && s_p_max_y <= s_p_min_y && s_p_max_y <= s_p_max_x) {
+			
+			for (i = index; i < len+index; i++) {
+				pxy.get(i).setY(2*p_max_y.getY()-pxy.get(i).getY());
+			}
+			
+			new_p_min_x.setX(p_max_y.getX());
+			new_p_min_x.setY(p_max_y.getY());
+			
+			new_p_min_y.setX(p_max_x.getX());
+			new_p_min_y.setY(p_max_x.getY());
+			
+			new_p_max_y.setX(p_max_y.getX());
+			new_p_max_y.setY(2*p_max_y.getY()-p_min_x.getY());
+			
+		}else{
+			new_p_max_y.setX(p_max_y.getX());
+			new_p_max_y.setY(p_max_y.getY());
+			
+			new_p_min_x.setX(p_min_x.getX());
+			new_p_min_x.setY(p_min_x.getY());
+			
+			new_p_min_y.setX(p_min_y.getX());
+			new_p_min_y.setY(p_min_y.getY());
+			
+		}
+		
+
+		if ((new_p_max_y.getY() - new_p_min_x.getY()) > (new_p_min_y.getX() - new_p_min_x.getX()) && (new_p_max_y.getY() - new_p_min_x.getY()) >15.0f) {
+			for (i = index; i < len+index; i++) {
+				pxy.get(i).setX(pxy.get(i).getX()- new_p_min_x.getX()+0.3f);
+				pxy.get(i).setY(pxy.get(i).getY()- new_p_min_x.getY()+0.3f);
+				float temp;
+				temp = pxy.get(i).getX();
+				pxy.get(i).setX(pxy.get(i).getY());
+				pxy.get(i).setY(temp);
+				
+				if(new_p_max_y.getY()-new_p_min_y.getY()>height){
+					pxy.get(i).setX(pxy.get(i).getX()*height/(new_p_max_y.getY()-new_p_min_y.getY()));
+				}
+				
+				if(new_p_min_y.getX()-new_p_min_x.getX()>width){
+					pxy.get(i).setY(pxy.get(i).getY()*width/(new_p_min_y.getX()-new_p_min_x.getX()));
+				}
+
+			}
+		}
+		else {
+			for (i = index; i < len+index; i++) {
+				pxy.get(i).setX(pxy.get(i).getX()- new_p_min_x.getX()+0.3f);
+				pxy.get(i).setY(pxy.get(i).getY()- new_p_min_x.getY()+0.3f);
+				
+				if(new_p_min_y.getX()-new_p_min_x.getX()>height){
+					pxy.get(i).setX(pxy.get(i).getX()*height/(new_p_min_y.getX()-new_p_min_x.getX()));
+				}
+				
+				if(new_p_max_y.getY()-new_p_min_y.getY()>width){
+					pxy.get(i).setY(pxy.get(i).getY()*width/(new_p_max_y.getY()-new_p_min_y.getY()));
+				}
+			}
+		}
+
+		
+	}
+
+	public static void data_analysis_v3(ArrayList<Point> xy, int len, ArrayList<Point> pxy,int full){
+		int i;
+		if (full == 0) {
+			width = 15;
+			height = 14;
+		}
+		else {
+			width = 15;
+			height = 28;
+		}
+		if(len>100){
+			for(i=0;i<len/100;i++){
+				if(len-i*100>150){
+					data_conver_v2(xy, pxy, i*100, 100);
+				}else{
+					data_conver_v2(xy, pxy, i*100, 100+len%100);
+				}
+			}
+			if(len%100>50){
+				data_conver_v2(xy, pxy, len-len%100, len%100);
+			}
+		}else{
+
+			data_conver_v2(xy, pxy,0, len);
+		}
 	}
 	
 	public static void data_analysis_v2(ArrayList<Point> xy, int len, ArrayList<Point> pxy){
